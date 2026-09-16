@@ -30,10 +30,13 @@ if (!supabaseAnonKey || supabaseAnonKey.length < 10) {
 
 // Create Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  // This app authenticates against its own users table. Keep Supabase Auth
+  // disabled in the browser so the embedded preview does not require auth
+  // cookies or cross-origin callback handling.
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
   },
 })
 
