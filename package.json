@@ -7,7 +7,7 @@
     "build": "next build",
     "db:generate-types": "supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public > lib/database.types.ts",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "eslint .",
     "start": "next start"
   },
   "dependencies": {
