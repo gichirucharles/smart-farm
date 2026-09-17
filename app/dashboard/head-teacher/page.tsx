@@ -1,14 +1,10 @@
-import type { Metadata } from "next"
+'use client'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UserProfileHeader } from "@/components/layout/user-profile-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-
-export const metadata: Metadata = {
-  title: "Head Teacher Dashboard | ShuleVerse",
-  description: "Head Teacher Dashboard for ShuleVerse School Management System",
-}
 
 const performanceData = [
   { month: "Jan", average: 72, target: 75 },
