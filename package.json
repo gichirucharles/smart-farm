@@ -4,11 +4,11 @@
   "private": true,
   "packageManager": "pnpm@12.3.4",
   "scripts": {
-    "build": "next build",
-    "db:generate-types": "supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public > lib/database.types.ts",
     "dev": "next dev",
-    "lint": "eslint .",
-    "start": "next start"
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate-types": "supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public > lib/database.types.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -39,7 +39,7 @@
     "date-fns": "latest",
     "geist": "^1.7.2",
     "lucide-react": "^0.454.0",
-    "next": "16.2.0",
+    "next": "14.2.35",
     "react": "^19",
     "react-day-picker": "^10.0.1",
     "react-dom": "^19",
