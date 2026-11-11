@@ -263,13 +263,13 @@ export default function ParentDashboard() {
 
         {/* Main Content Tabs - Updated with all sections */}
         <Tabs defaultValue="academic" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="academic">Academic Progress</TabsTrigger>
-            <TabsTrigger value="attendance">Attendance</TabsTrigger>
-            <TabsTrigger value="assignments">Assignments</TabsTrigger>
-            <TabsTrigger value="messages">Messages ({unreadMessageCount})</TabsTrigger>
-            <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications ({unreadNotificationCount})</TabsTrigger>
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 sm:grid-cols-3 lg:grid-cols-6">
+            <TabsTrigger value="academic" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Academic Progress</TabsTrigger>
+            <TabsTrigger value="attendance" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Attendance</TabsTrigger>
+            <TabsTrigger value="assignments" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Assignments</TabsTrigger>
+            <TabsTrigger value="messages" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Messages ({unreadMessageCount})</TabsTrigger>
+            <TabsTrigger value="calendar" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Calendar</TabsTrigger>
+            <TabsTrigger value="notifications" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Notifications ({unreadNotificationCount})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="academic" className="space-y-6">
