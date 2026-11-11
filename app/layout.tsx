@@ -3,10 +3,11 @@ import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+import { ThemePreferenceProvider } from '@/components/theme-preference-provider'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
+  title: 'ShuleVerse',
+  description: 'A parent portal for school updates, student progress, and family communication.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -33,10 +34,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={GeistSans.variable}>
+    <html lang="en" className={GeistSans.variable} suppressHydrationWarning>
       <body className={GeistMono.variable}>
-        {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <ThemePreferenceProvider>
+          {children}
+          {process.env.NODE_ENV === 'production' && <Analytics />}
+        </ThemePreferenceProvider>
       </body>
     </html>
   )

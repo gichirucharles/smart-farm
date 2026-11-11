@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
+import Link from "next/link"
 import {
   Sidebar,
   SidebarContent,
@@ -233,15 +234,24 @@ export function RoleBasedNavigation() {
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (userData) {
-      setUser(JSON.parse(userData))
+    try {
+      const userData = localStorage.getItem("userSession") ?? localStorage.getItem("user")
+      if (!userData) return
+      const storedUser = JSON.parse(userData)
+      setUser({
+        ...storedUser,
+        firstName: storedUser.firstName ?? storedUser.first_name ?? "",
+        lastName: storedUser.lastName ?? storedUser.last_name ?? "",
+      })
+    } catch {
+      setUser(null)
     }
   }, [router])
 
   const handleLogout = () => {
+    localStorage.removeItem("userSession")
     localStorage.removeItem("user")
-    router.push("/")
+    router.replace("/")
   }
 
   if (!user) {
@@ -358,16 +368,24 @@ export function RoleBasedNavigation() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
-                <DropdownMenuItem>
-                  <Users className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
+                {user.role === "parent" && (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/parent/profile">
+                        <Users className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/parent/settings">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                <DropdownMenuItem onSelect={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
                 </DropdownMenuItem>
