@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -46,24 +46,40 @@ import {
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 
+const NETWORK_SETTINGS_STORAGE_KEY = "shuleverse-network-settings"
+
+const DEFAULT_GENERAL_SETTINGS = {
+  networkName: "ShuleVerse Education Network",
+  adminEmail: "admin@shuleverse.edu.tz",
+  contactPhone: "+255 123 456 789",
+  timezone: "Africa/Dar_es_Salaam",
+  dateFormat: "DD/MM/YYYY",
+  language: "en-US",
+  fiscalYearStart: "January",
+  academicYearStart: "September",
+  termsPerYear: 3,
+  lastUpdated: "",
+}
+
+type GeneralSettings = typeof DEFAULT_GENERAL_SETTINGS
+
 export function NetworkSettings() {
   const [backupFrequency, setBackupFrequency] = useState(7)
   const [notificationLevel, setNotificationLevel] = useState(2)
   const [isTestEmailDialogOpen, setIsTestEmailDialogOpen] = useState(false)
+  const [generalSettings, setGeneralSettings] = useState(DEFAULT_GENERAL_SETTINGS)
+  const [saveStatus, setSaveStatus] = useState("")
 
-  // Mock settings data
-  const generalSettings = {
-    networkName: "ShuleVerse Education Network",
-    adminEmail: "admin@shuleverse.edu.tz",
-    contactPhone: "+255 123 456 789",
-    timezone: "Africa/Dar_es_Salaam",
-    dateFormat: "DD/MM/YYYY",
-    language: "en-US",
-    fiscalYearStart: "January",
-    academicYearStart: "September",
-    termsPerYear: 3,
-    lastUpdated: "2023-06-15T10:30:00Z",
-  }
+  useEffect(() => {
+    try {
+      const savedSettings = localStorage.getItem(NETWORK_SETTINGS_STORAGE_KEY)
+      if (savedSettings) {
+        setGeneralSettings({ ...DEFAULT_GENERAL_SETTINGS, ...(JSON.parse(savedSettings) as Partial<GeneralSettings>) })
+      }
+    } catch {
+      localStorage.removeItem(NETWORK_SETTINGS_STORAGE_KEY)
+    }
+  }, [])
 
   const securitySettings = {
     passwordPolicy: {
@@ -136,6 +152,22 @@ export function NetworkSettings() {
     { id: "mod8", name: "Attendance", status: "Enabled", icon: <Clock className="h-5 w-5" /> },
   ]
 
+  const updateGeneralSetting = (key: keyof GeneralSettings, value: string | number) => {
+    setGeneralSettings((current) => ({ ...current, [key]: value }) as GeneralSettings)
+  }
+
+  const handleSaveChanges = () => {
+    const updatedSettings = { ...generalSettings, lastUpdated: new Date().toISOString() }
+
+    try {
+      localStorage.setItem(NETWORK_SETTINGS_STORAGE_KEY, JSON.stringify(updatedSettings))
+      setGeneralSettings(updatedSettings)
+      setSaveStatus("Saved in this browser. Changes are not synchronized across schools or users.")
+    } catch {
+      setSaveStatus("Could not save settings in this browser.")
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -144,38 +176,43 @@ export function NetworkSettings() {
             <CardTitle>Network Settings</CardTitle>
             <CardDescription>Configure system-wide settings for all schools</CardDescription>
           </div>
-          <Button>
+          <Button type="button" onClick={handleSaveChanges}>
             <Save className="mr-2 h-4 w-4" />
             Save Changes
           </Button>
         </div>
+        {saveStatus && (
+          <p role="status" aria-live="polite" className="mt-3 text-sm text-muted-foreground">
+            {saveStatus}
+          </p>
+        )}
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="general">
-          <TabsList className="grid w-full grid-cols-6 mb-4">
-            <TabsTrigger value="general">
+          <TabsList className="mb-4 grid h-auto w-full grid-cols-2 gap-1 p-1 lg:grid-cols-3 xl:grid-cols-6">
+            <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-2 text-center text-xs leading-tight sm:text-sm" value="general">
               <Laptop className="h-4 w-4 mr-2" />
-              <span className="hidden md:inline">General</span>
+              <span>General</span>
             </TabsTrigger>
-            <TabsTrigger value="security">
+            <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-2 text-center text-xs leading-tight sm:text-sm" value="security">
               <Lock className="h-4 w-4 mr-2" />
-              <span className="hidden md:inline">Security</span>
+              <span>Security</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications">
+            <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-2 text-center text-xs leading-tight sm:text-sm" value="notifications">
               <Bell className="h-4 w-4 mr-2" />
-              <span className="hidden md:inline">Notifications</span>
+              <span>Notifications</span>
             </TabsTrigger>
-            <TabsTrigger value="integrations">
+            <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-2 text-center text-xs leading-tight sm:text-sm" value="integrations">
               <Globe className="h-4 w-4 mr-2" />
-              <span className="hidden md:inline">Integrations</span>
+              <span>Integrations</span>
             </TabsTrigger>
-            <TabsTrigger value="modules">
+            <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-2 text-center text-xs leading-tight sm:text-sm" value="modules">
               <BookOpen className="h-4 w-4 mr-2" />
-              <span className="hidden md:inline">Modules</span>
+              <span>Modules</span>
             </TabsTrigger>
-            <TabsTrigger value="backup">
+            <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-2 text-center text-xs leading-tight sm:text-sm" value="backup">
               <UploadCloud className="h-4 w-4 mr-2" />
-              <span className="hidden md:inline">Backup</span>
+              <span>Backup</span>
             </TabsTrigger>
           </TabsList>
 
@@ -187,7 +224,8 @@ export function NetworkSettings() {
                     <Label htmlFor="network-name">Network Name</Label>
                     <Input
                       id="network-name"
-                      defaultValue={generalSettings.networkName}
+                      value={generalSettings.networkName}
+                      onChange={(event) => updateGeneralSetting("networkName", event.target.value)}
                       placeholder="Enter network name"
                     />
                   </div>
@@ -197,7 +235,8 @@ export function NetworkSettings() {
                     <Input
                       id="admin-email"
                       type="email"
-                      defaultValue={generalSettings.adminEmail}
+                      value={generalSettings.adminEmail}
+                      onChange={(event) => updateGeneralSetting("adminEmail", event.target.value)}
                       placeholder="Enter admin email"
                     />
                   </div>
@@ -206,14 +245,15 @@ export function NetworkSettings() {
                     <Label htmlFor="contact-phone">Contact Phone</Label>
                     <Input
                       id="contact-phone"
-                      defaultValue={generalSettings.contactPhone}
+                      value={generalSettings.contactPhone}
+                      onChange={(event) => updateGeneralSetting("contactPhone", event.target.value)}
                       placeholder="Enter contact phone"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="timezone">Timezone</Label>
-                    <Select defaultValue={generalSettings.timezone}>
+                    <Select value={generalSettings.timezone} onValueChange={(value) => updateGeneralSetting("timezone", value)}>
                       <SelectTrigger id="timezone">
                         <SelectValue placeholder="Select timezone" />
                       </SelectTrigger>
@@ -230,7 +270,7 @@ export function NetworkSettings() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="date-format">Date Format</Label>
-                    <Select defaultValue={generalSettings.dateFormat}>
+                    <Select value={generalSettings.dateFormat} onValueChange={(value) => updateGeneralSetting("dateFormat", value)}>
                       <SelectTrigger id="date-format">
                         <SelectValue placeholder="Select date format" />
                       </SelectTrigger>
@@ -244,7 +284,7 @@ export function NetworkSettings() {
 
                   <div className="space-y-2">
                     <Label htmlFor="language">System Language</Label>
-                    <Select defaultValue={generalSettings.language}>
+                    <Select value={generalSettings.language} onValueChange={(value) => updateGeneralSetting("language", value)}>
                       <SelectTrigger id="language">
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
@@ -259,7 +299,7 @@ export function NetworkSettings() {
 
                   <div className="space-y-2">
                     <Label htmlFor="fiscal-year">Fiscal Year Start</Label>
-                    <Select defaultValue={generalSettings.fiscalYearStart}>
+                    <Select value={generalSettings.fiscalYearStart} onValueChange={(value) => updateGeneralSetting("fiscalYearStart", value)}>
                       <SelectTrigger id="fiscal-year">
                         <SelectValue placeholder="Select month" />
                       </SelectTrigger>
@@ -273,7 +313,7 @@ export function NetworkSettings() {
 
                   <div className="space-y-2">
                     <Label htmlFor="academic-year">Academic Year Start</Label>
-                    <Select defaultValue={generalSettings.academicYearStart}>
+                    <Select value={generalSettings.academicYearStart} onValueChange={(value) => updateGeneralSetting("academicYearStart", value)}>
                       <SelectTrigger id="academic-year">
                         <SelectValue placeholder="Select month" />
                       </SelectTrigger>
@@ -289,7 +329,10 @@ export function NetworkSettings() {
 
               <div className="space-y-2">
                 <Label htmlFor="terms-per-year">Terms Per Academic Year</Label>
-                <Select defaultValue={generalSettings.termsPerYear.toString()}>
+                <Select
+                  value={generalSettings.termsPerYear.toString()}
+                  onValueChange={(value) => updateGeneralSetting("termsPerYear", Number(value))}
+                >
                   <SelectTrigger id="terms-per-year">
                     <SelectValue placeholder="Select number of terms" />
                   </SelectTrigger>
@@ -303,7 +346,13 @@ export function NetworkSettings() {
 
               <div className="bg-muted/50 p-4 rounded-md">
                 <p className="text-sm text-muted-foreground">
-                  Last updated: {new Date(generalSettings.lastUpdated).toLocaleString()}
+                  Last updated: {generalSettings.lastUpdated
+                    ? new Date(generalSettings.lastUpdated).toLocaleString(undefined, {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                        timeZone: generalSettings.timezone,
+                      })
+                    : "No updates saved yet"}
                 </p>
               </div>
             </div>
@@ -984,7 +1033,7 @@ export function NetworkSettings() {
                 </div>
 
                 <div className="flex-1">
-                  <Button className="w-full">
+                  <Button type="button" className="w-full" onClick={handleSaveChanges}>
                     <Save className="mr-2 h-4 w-4" />
                     Save Settings
                   </Button>

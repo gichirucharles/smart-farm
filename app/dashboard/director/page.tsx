@@ -65,7 +65,7 @@ export default function DirectorDashboardPage() {
                   <CardDescription>Current term</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">$1.2M</div>
+                  <div className="text-3xl font-bold">KSh 1.2M</div>
                   <p className="text-xs text-muted-foreground">+18% from last term</p>
                 </CardContent>
               </Card>

@@ -24,7 +24,7 @@ export default function FinancialOverviewPage() {
         <Card>
           <CardHeader>
             <CardTitle>Budget Allocation</CardTitle>
-            <CardDescription>Total annual budget: KES 50M</CardDescription>
+            <CardDescription>Total annual budget: KSh 50M</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -48,15 +48,15 @@ export default function FinancialOverviewPage() {
           <CardContent className="space-y-4">
             <div className="flex justify-between">
               <span>Total Revenue</span>
-              <span className="font-bold">KES 45M</span>
+              <span className="font-bold">KSh 45M</span>
             </div>
             <div className="flex justify-between">
               <span>Total Expenditure</span>
-              <span className="font-bold">KES 42M</span>
+              <span className="font-bold">KSh 42M</span>
             </div>
             <div className="flex justify-between border-t pt-2">
               <span>Balance</span>
-              <span className="font-bold text-green-600">KES 3M</span>
+              <span className="font-bold text-green-600">KSh 3M</span>
             </div>
           </CardContent>
         </Card>

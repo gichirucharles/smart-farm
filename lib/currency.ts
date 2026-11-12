@@ -18,19 +18,11 @@ export function formatKSH(amount: number, showSymbol = true, decimals = 0): stri
   if (!amount && amount !== 0) return showSymbol ? `${CURRENCY_SYMBOL} 0` : '0'
 
   const formatted = new Intl.NumberFormat('en-KE', {
-    style: 'currency',
-    currency: CURRENCY_CODE,
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(amount)
 
-  if (!showSymbol) {
-    // Remove the currency symbol from the formatted string
-    return formatted.replace(/^KES\s/, '').replace(/^Ksh\s/, '')
-  }
-
-  // Replace KES with KSh for consistency
-  return formatted.replace('KES', CURRENCY_SYMBOL)
+  return showSymbol ? `${CURRENCY_SYMBOL} ${formatted}` : formatted
 }
 
 /**
