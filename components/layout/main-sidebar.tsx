@@ -22,11 +22,11 @@ import {
   HeartHandshake,
   Calculator,
   UserCog,
-  GraduationCap,
   ShieldCheck,
   ShieldAlert,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { AppLogo } from "@/components/layout/app-logo"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -72,11 +72,9 @@ export function MainSidebar({ className }: SidebarProps) {
     <div className={cn("pb-12 w-64 bg-white border-r", className)}>
       <div className="space-y-4 py-4">
         <div className="px-3 py-2">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <GraduationCap className="h-6 w-6" />
-            <span>ShuleVerse</span>
+          <Link href="/" aria-label="ShuleVerse home" className="block w-fit">
+            <AppLogo position="left" size="small" showText={true} showTagline={true} />
           </Link>
-          <p className="text-xs text-gray-500">School Management System</p>
         </div>
         <ScrollArea className="h-[calc(100vh-8rem)]">
           <div className="space-y-1 px-3">
