@@ -13,7 +13,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export const UserProfileHeader = () => {
+type UserProfileHeaderProps = {
+  name?: string
+  role?: string
+  school?: string
+  avatarUrl?: string
+}
+
+export const UserProfileHeader = ({ name, role, school, avatarUrl }: UserProfileHeaderProps) => {
   const [userId, setUserId] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
   const [userName, setUserName] = useState<string | null>(null)
@@ -81,13 +88,21 @@ export const UserProfileHeader = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={schoolLogo || "/placeholder.svg"} alt={schoolName || "User"} />
-            <AvatarFallback>{userName?.slice(0, 2).toUpperCase() || "UV"}</AvatarFallback>
+            <AvatarImage src={schoolLogo || avatarUrl || "/placeholder.svg"} alt={schoolName || school || name || "User"} />
+            <AvatarFallback>{(userName || name)?.slice(0, 2).toUpperCase() || "UV"}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel className="flex flex-col gap-1">
+          <span>{userName || name || "My Account"}</span>
+          {(userRole || role) && (
+            <span className="text-xs font-normal text-muted-foreground">{userRole || role}</span>
+          )}
+          {(schoolName || school) && (
+            <span className="text-xs font-normal text-muted-foreground">{schoolName || school}</span>
+          )}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <Link href="/profile" className="w-full h-full block">
