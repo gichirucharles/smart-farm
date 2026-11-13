@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
+import { Calendar as VisitCalendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -57,6 +58,8 @@ export function SickBayVisits() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedClass, setSelectedClass] = useState("all")
   const [isAddVisitOpen, setIsAddVisitOpen] = useState(false)
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date | undefined>()
 
   // Mock data for sick bay visits
   const sickBayVisits = [
@@ -65,8 +68,8 @@ export function SickBayVisits() {
       studentName: "Ahmed Mohamed",
       avatar: "/placeholder.svg?height=40&width=40",
       class: "Grade 5A",
-      timeIn: "2023-06-15T09:30:00",
-      timeOut: "2023-06-15T10:15:00",
+      timeIn: "2026-11-13T09:30:00",
+      timeOut: "2026-11-13T10:15:00",
       complaint: "Headache",
       treatment: "Paracetamol 500mg",
       status: "discharged",
@@ -78,7 +81,7 @@ export function SickBayVisits() {
       studentName: "Mary Johnson",
       avatar: "/placeholder.svg?height=40&width=40",
       class: "Grade 3B",
-      timeIn: "2023-06-15T10:45:00",
+      timeIn: "2026-11-13T10:45:00",
       timeOut: null,
       complaint: "Stomachache",
       treatment: "Antacid",
@@ -91,8 +94,8 @@ export function SickBayVisits() {
       studentName: "James Wilson",
       avatar: "/placeholder.svg?height=40&width=40",
       class: "Grade 7A",
-      timeIn: "2023-06-15T08:15:00",
-      timeOut: "2023-06-15T08:45:00",
+      timeIn: "2026-11-13T08:15:00",
+      timeOut: "2026-11-13T08:45:00",
       complaint: "Minor cut on finger",
       treatment: "Antiseptic and bandage",
       status: "discharged",
@@ -104,8 +107,8 @@ export function SickBayVisits() {
       studentName: "Fatima Ahmed",
       avatar: "/placeholder.svg?height=40&width=40",
       class: "Grade 4C",
-      timeIn: "2023-06-14T13:20:00",
-      timeOut: "2023-06-14T14:00:00",
+      timeIn: "2026-11-12T13:20:00",
+      timeOut: "2026-11-12T14:00:00",
       complaint: "Fever",
       treatment: "Paracetamol 250mg",
       status: "discharged",
@@ -117,7 +120,7 @@ export function SickBayVisits() {
       studentName: "Daniel Okafor",
       avatar: "/placeholder.svg?height=40&width=40",
       class: "Grade 6B",
-      timeIn: "2023-06-15T11:10:00",
+      timeIn: "2026-11-13T11:10:00",
       timeOut: null,
       complaint: "Sprained ankle",
       treatment: "Ice pack and rest",
@@ -203,6 +206,12 @@ export function SickBayVisits() {
     }
   }
 
+  const visitsOnSelectedDate = selectedCalendarDate
+    ? sickBayVisits.filter(
+        (visit) => new Date(visit.timeIn).toDateString() === selectedCalendarDate.toDateString(),
+      )
+    : []
+
   return (
     <Card>
       <CardHeader>
@@ -216,7 +225,13 @@ export function SickBayVisits() {
               <Plus className="mr-2 h-4 w-4" />
               New Visit
             </Button>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedCalendarDate(sickBayVisits[0] ? new Date(sickBayVisits[0].timeIn) : new Date())
+                setIsCalendarOpen(true)
+              }}
+            >
               <Calendar className="mr-2 h-4 w-4" />
               View Calendar
             </Button>
@@ -469,7 +484,7 @@ export function SickBayVisits() {
                         cx="50%"
                         cy="50%"
                         labelLine={true}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
@@ -576,6 +591,66 @@ export function SickBayVisits() {
               </Button>
               <Button onClick={() => setIsAddVisitOpen(false)}>Add Visit</Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Sick Bay Visit Calendar</DialogTitle>
+              <DialogDescription>Select a date to review recorded sick bay visits.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <VisitCalendar
+                mode="single"
+                selected={selectedCalendarDate}
+                onSelect={setSelectedCalendarDate}
+                className="rounded-md border"
+              />
+              <section aria-label="Visits on selected date" className="flex flex-col gap-3">
+                <h3 className="font-medium">
+                  {selectedCalendarDate
+                    ? selectedCalendarDate.toLocaleDateString("en-KE", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
+                    : "Choose a date"}
+                </h3>
+                {visitsOnSelectedDate.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    {visitsOnSelectedDate.map((visit) => (
+                      <div key={visit.id} className="rounded-lg border p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-medium">{visit.studentName}</p>
+                          <Badge variant={visit.status === "discharged" ? "outline" : "secondary"}>
+                            {visit.status === "discharged" ? "Discharged" : "Under observation"}
+                          </Badge>
+                        </div>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {visit.class} · {visit.complaint}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {new Date(visit.timeIn).toLocaleTimeString("en-KE", {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                          {visit.timeOut
+                            ? `–${new Date(visit.timeOut).toLocaleTimeString("en-KE", {
+                                hour: "numeric",
+                                minute: "2-digit",
+                              })}`
+                            : " · Still in sick bay"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No recorded visits for this date.</p>
+                )}
+              </section>
+            </div>
           </DialogContent>
         </Dialog>
       </CardContent>
