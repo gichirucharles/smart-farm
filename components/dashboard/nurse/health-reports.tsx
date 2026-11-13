@@ -6,9 +6,9 @@ import { FileText } from "lucide-react"
 
 export function HealthReports() {
   const reports = [
-    { id: 1, title: "Monthly Health Summary", date: "2024-01-31", status: "Completed" },
-    { id: 2, title: "Immunization Tracking", date: "2024-02-05", status: "In Progress" },
-    { id: 3, title: "Accident & Incident Report", date: "2024-02-10", status: "Pending" },
+    { id: 1, title: "Monthly Health Summary", date: "2026-10-31", status: "Completed" },
+    { id: 2, title: "Immunization Tracking", date: "2026-11-05", status: "In Progress" },
+    { id: 3, title: "Accident & Incident Report", date: "2026-11-10", status: "Pending" },
   ]
 
   return (
