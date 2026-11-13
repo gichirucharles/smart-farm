@@ -144,6 +144,48 @@ export function DirectorAcademicPerformance() {
     { subject: "ICT", A: 94, B: 85, fullMark: 100 },
   ]
 
+  const exportAcademicReport = () => {
+    const reportRows: Array<Array<string | number>> = [
+      ["Network Academic Performance Report"],
+      ["School year", selectedYear],
+      ["Term", selectedTerm],
+      [],
+      ["Summary", "Value"],
+      ["Average performance", `${academicOverview.averagePerformance}%`],
+      ["Passing rate", `${academicOverview.passingRate}%`],
+      ["Students", academicOverview.totalStudents],
+      ["Exams taken", academicOverview.examsTaken],
+      [],
+      ["School", "Current score", "Previous score", "Change", "Students", "Passing rate"],
+      ...schoolPerformanceData.map((school) => [
+        school.name,
+        `${school.score}%`,
+        `${school.previousScore}%`,
+        `${(school.score - school.previousScore).toFixed(1)}%`,
+        school.students,
+        `${school.passRate}%`,
+      ]),
+      [],
+      ["Subject", "Current score", "Previous score", "Change", "Trend"],
+      ...subjectPerformanceData.map((subject) => [
+        subject.subject,
+        `${subject.score}%`,
+        `${subject.previousScore}%`,
+        `${(subject.score - subject.previousScore).toFixed(1)}%`,
+        subject.trend,
+      ]),
+    ]
+    const csv = reportRows
+      .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))
+      .join("\r\n")
+    const downloadUrl = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }))
+    const downloadLink = document.createElement("a")
+    downloadLink.href = downloadUrl
+    downloadLink.download = `academic-performance-${selectedYear}-${selectedTerm}-${new Date().toISOString().slice(0, 10)}.csv`
+    downloadLink.click()
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000)
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -175,7 +217,12 @@ export function DirectorAcademicPerformance() {
               </SelectContent>
             </Select>
 
-            <Button variant="outline">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={exportAcademicReport}
+              aria-label="Export academic performance report as CSV"
+            >
               <Download className="mr-2 h-4 w-4" />
               Export Report
             </Button>
@@ -184,11 +231,11 @@ export function DirectorAcademicPerformance() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="overview">
-          <TabsList className="grid w-full grid-cols-4 mb-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="schools">Schools Comparison</TabsTrigger>
-            <TabsTrigger value="subjects">Subject Analysis</TabsTrigger>
-            <TabsTrigger value="trends">Performance Trends</TabsTrigger>
+<TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 mb-4 lg:grid-cols-4">
+              <TabsTrigger value="overview" className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Overview</TabsTrigger>
+              <TabsTrigger value="schools" className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Schools Comparison</TabsTrigger>
+              <TabsTrigger value="subjects" className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Subject Analysis</TabsTrigger>
+              <TabsTrigger value="trends" className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Performance Trends</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">

@@ -18,6 +18,7 @@ import {
   YAxis,
 } from "recharts"
 import { Download, TrendingUp, TrendingDown, DollarSign, AlertCircle } from "lucide-react"
+import { formatKSH } from "@/lib/currency"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
@@ -81,15 +82,7 @@ export function DirectorFinancialOverview() {
   const EXPENSE_COLORS = ["#4f46e5", "#22c55e", "#eab308", "#f97316", "#ef4444"]
   const REVENUE_COLORS = ["#3b82f6", "#8b5cf6", "#06b6d4", "#14b8a6", "#f43f5e"]
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "TZS",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
+  const formatCurrency = (amount: number) => formatKSH(amount)
 
   return (
     <Card>
@@ -120,15 +113,15 @@ export function DirectorFinancialOverview() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="overview">
-          <TabsList className="grid w-full grid-cols-4 mb-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="comparisons">School Comparisons</TabsTrigger>
-            <TabsTrigger value="trends">Trends</TabsTrigger>
-            <TabsTrigger value="analysis">Analysis</TabsTrigger>
+          <TabsList className="mb-4 grid h-auto w-full grid-cols-2 gap-1 p-1 lg:grid-cols-4">
+            <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-2 text-center leading-tight" value="overview">Overview</TabsTrigger>
+            <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-2 text-center leading-tight" value="comparisons">School Comparisons</TabsTrigger>
+            <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-2 text-center leading-tight" value="trends">Trends</TabsTrigger>
+            <TabsTrigger className="h-auto min-h-10 whitespace-normal px-2 py-2 text-center leading-tight" value="analysis">Analysis</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg">Total Revenue</CardTitle>
@@ -268,7 +261,7 @@ export function DirectorFinancialOverview() {
                         cx="50%"
                         cy="50%"
                         labelLine={true}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
@@ -297,7 +290,7 @@ export function DirectorFinancialOverview() {
                         cx="50%"
                         cy="50%"
                         labelLine={true}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"

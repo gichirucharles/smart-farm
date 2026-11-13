@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { formatKSH } from "@/lib/currency"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -142,14 +143,7 @@ export function FinanceOverview() {
     return matchesSearch && matchesCategory
   })
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-    }).format(amount)
-  }
+  const formatCurrency = (amount: number) => formatKSH(amount)
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -197,15 +191,15 @@ export function FinanceOverview() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-4 mb-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
-              <TabsTrigger value="fee-collection">Fee Collection</TabsTrigger>
-              <TabsTrigger value="reports">Financial Reports</TabsTrigger>
+            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 mb-4 lg:grid-cols-4">
+              <TabsTrigger className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight text-xs sm:text-sm" value="overview">Overview</TabsTrigger>
+              <TabsTrigger className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight text-xs sm:text-sm" value="transactions">Transactions</TabsTrigger>
+              <TabsTrigger className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight text-xs sm:text-sm" value="fee-collection">Fee Collection</TabsTrigger>
+              <TabsTrigger className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight text-xs sm:text-sm" value="reports">Financial Reports</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">Total Revenue</CardTitle>
@@ -340,7 +334,7 @@ export function FinanceOverview() {
                           cx="50%"
                           cy="50%"
                           labelLine={true}
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="value"
@@ -509,7 +503,7 @@ export function FinanceOverview() {
             </TabsContent>
 
             <TabsContent value="fee-collection" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">Fee Collection</CardTitle>
@@ -719,7 +713,7 @@ export function FinanceOverview() {
 
                   <div className="mt-4 pt-4 border-t">
                     <h3 className="text-sm font-medium mb-3">Generate Custom Report</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                       <div className="space-y-2">
                         <Label htmlFor="report-type">Report Type</Label>
                         <Select>

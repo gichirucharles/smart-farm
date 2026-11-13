@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { usePathname } from "next/navigation"
 import { RoleBasedNavigation } from "@/components/dashboard/role-based-navigation"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -19,6 +20,12 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
+  const currentSegment = pathname.split("/").filter(Boolean).at(-1) ?? "dashboard"
+  const currentLabel = currentSegment === "parent"
+    ? "Overview"
+    : currentSegment.replace(/-/g, " ").replace(/\b\w/g, (character) => character.toUpperCase())
+
   return (
     <SidebarProvider>
       <RoleBasedNavigation />
@@ -33,7 +40,7 @@ export default function DashboardLayout({
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Overview</BreadcrumbPage>
+                <BreadcrumbPage>{currentLabel}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
