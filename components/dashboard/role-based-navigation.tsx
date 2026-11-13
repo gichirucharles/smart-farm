@@ -15,7 +15,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
+import { AppLogo } from "@/components/layout/app-logo"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -41,7 +43,6 @@ import {
   Database,
   LogOut,
   ChevronUp,
-  School,
   ClipboardList,
   TrendingUp,
   DollarSign,
@@ -231,6 +232,7 @@ const roleNavigationConfig = {
 export function RoleBasedNavigation() {
   const router = useRouter()
   const pathname = usePathname()
+  const { state } = useSidebar()
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
@@ -259,12 +261,16 @@ export function RoleBasedNavigation() {
     return (
       <Sidebar>
         <SidebarHeader>
-          <div className="flex items-center gap-2 px-2 py-2">
-            <School className="h-6 w-6 text-blue-600" />
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold">ShuleVerse</span>
-              <span className="text-xs text-gray-500">Testing Mode</span>
-            </div>
+          <div className="flex flex-col gap-1">
+            <AppLogo
+              position="left"
+              size="small"
+              showText={state !== "collapsed"}
+              showTagline={state !== "collapsed"}
+            />
+            {state !== "collapsed" && (
+              <p className="px-2 text-xs text-muted-foreground">Testing Mode</p>
+            )}
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -289,7 +295,10 @@ export function RoleBasedNavigation() {
     )
   }
 
-  const navigationConfig = roleNavigationConfig[user.role as keyof typeof roleNavigationConfig]
+  const normalizedRole = user.role.trim().toLowerCase().replace(/[\s-]+/g, "_")
+  const navigationConfig =
+    roleNavigationConfig[user.role as keyof typeof roleNavigationConfig] ??
+    roleNavigationConfig[normalizedRole as keyof typeof roleNavigationConfig]
 
   if (!navigationConfig) {
     return null
@@ -298,15 +307,12 @@ export function RoleBasedNavigation() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-3 px-2 py-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-[#b8d4f0] to-[#a8c8e8] rounded-lg flex items-center justify-center border border-white/30">
-            <School className="h-5 w-5 text-[#1e3a8a]" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-[#1e3a8a]">ShuleVerse</span>
-            <span className="text-xs text-gray-500">A Universe of Learning</span>
-          </div>
-        </div>
+        <AppLogo
+          position="left"
+          size="small"
+          showText={state !== "collapsed"}
+          showTagline={state !== "collapsed"}
+        />
       </SidebarHeader>
 
       <SidebarContent>
