@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Download, Eye, Filter, MapPin, Mail, Phone, Search } from "lucide-react"
+import { Download, Eye, Filter, MapPin, Search } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,122 @@ import {
 } from "@/components/dashboard/director/school-directory-data"
 import { downloadCsv } from "@/lib/download-csv"
 
+function InfoSection({
+  title,
+  items,
+}: {
+  title: string
+  items: Array<[string, string | number | null | undefined]>
+}) {
+  return (
+    <section className="rounded-lg border p-4">
+      <h3 className="font-medium">{title}</h3>
+      <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+        {items.map(([label, value]) => (
+          <div key={label}>
+            <dt className="text-xs text-muted-foreground">{label}</dt>
+            <dd className="break-words text-sm">{value === null || value === undefined || value === "" ? "Not recorded" : value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )
+}
+
+function SchoolDetailsContent({ school }: { school: School }) {
+  const details = school.registrationDetails
+  const createdAt = school.createdAt
+    ? new Date(school.createdAt).toLocaleString("en-KE")
+    : undefined
+
+  return (
+    <div className="grid max-h-[65vh] gap-4 overflow-y-auto pr-1 sm:grid-cols-2">
+      <InfoSection
+        title="School identity"
+        items={[
+          ["Name", school.name],
+          ["Type / level", details?.schoolLevel],
+          ["Ownership", details?.ownership],
+          ["Gender", details?.genderType],
+          ["Boarding", details?.boardingStatus],
+          ["Curriculum", details?.curriculum === "Other" ? details.curriculumOther : details?.curriculum],
+        ]}
+      />
+      <InfoSection
+        title="Government and regulatory"
+        items={[
+          ["NEMIS code", details?.nemisCode],
+          ["KNEC center code", details?.knecCenterCode],
+          ["Ministry registration", details?.ministryRegistrationNumber],
+          ["License status", details?.licenseStatus],
+          ["License expiry", details?.registrationExpiryDate],
+          ["KRA PIN", details?.kraPin],
+          ["Business registration", details?.businessRegistrationNumber],
+          ["Sponsor / owner", details?.sponsorOwnerName],
+        ]}
+      />
+      <InfoSection
+        title="Location"
+        items={[
+          ["Town / city", school.location],
+          ["County", school.county],
+          ["Sub-county", details?.subCounty],
+          ["Ward", details?.ward],
+          ["Physical address", details?.physicalAddress],
+          ["Nearest landmark", details?.nearestLandmark],
+          ["GPS coordinates", details?.gpsCoordinates],
+          ["Postal address", details?.postalAddress],
+        ]}
+      />
+      <InfoSection
+        title="School and leadership contacts"
+        items={[
+          ["School email", school.contactEmail],
+          ["School phone", school.contactPhone],
+          ["Head teacher / principal", school.headTeacher],
+          ["Head teacher phone", details?.headTeacherPhone],
+          ["Head teacher email", details?.headTeacherEmail],
+          ["TSC number", details?.tscNumber],
+          ["BOM chair / proprietor", details?.boardChairName],
+          ["BOM chair phone", details?.boardChairPhone],
+          ["BOM chair email", details?.boardChairEmail],
+        ]}
+      />
+      <InfoSection
+        title="Operational details"
+        items={[
+          ["Year established", details?.yearEstablished || school.establishedYear],
+          ["Streams per class", details?.streamsPerClass],
+          ["Students", school.studentsCount],
+          ["Teachers", school.teachersCount],
+          ["Academic year", details?.academicYear],
+          ["School motto", details?.schoolMotto],
+        ]}
+      />
+      <InfoSection
+        title="Director and school access"
+        items={[
+          ["Assigned director / owner", details?.assignedDirector],
+          ["First school-admin email", details?.schoolAdminEmail],
+          ["First school-admin phone", details?.schoolAdminPhone],
+          ["School status", details?.systemStatus ?? school.status],
+          ["Created by", school.createdBy],
+          ["Created date", createdAt],
+        ]}
+      />
+      <InfoSection
+        title="Documents and logo"
+        items={[
+          ["Registration certificate", details?.documents.registrationCertificate?.name],
+          ["Operating license", details?.documents.operatingLicense?.name],
+          ["KRA certificate", details?.documents.kraCertificate?.name],
+          ["School logo", details?.documents.logo?.name],
+        ]}
+      />
+    </div>
+  )
+}
+
 export function SchoolManagement() {
   const [schools, setSchools] = useState(INITIAL_SCHOOLS)
   const [searchQuery, setSearchQuery] = useState("")
@@ -56,16 +172,30 @@ export function SchoolManagement() {
   }, [schools, searchQuery, selectedCounty])
 
   const handleAddSchool = (draft: NewSchoolDraft) => {
+    const details = draft.registrationDetails
+    const toCount = (value: string) => {
+      const count = Number(value)
+      return Number.isSafeInteger(count) && count >= 0 ? count : 0
+    }
+    const yearEstablished = Number(details.yearEstablished)
+    const status: School["status"] =
+      details.systemStatus === "Active"
+        ? "active"
+        : details.systemStatus === "Suspended"
+          ? "suspended"
+          : "under review"
     const school: School = {
       ...draft,
       id: `school-${Date.now()}`,
       logo: "/placeholder.svg?height=40&width=40",
-      studentsCount: 0,
-      teachersCount: 0,
+      studentsCount: toCount(details.studentsCount),
+      teachersCount: toCount(details.teachersCount),
       performanceIndex: 0,
-      status: "under review",
+      status,
       website: "",
-      establishedYear: new Date().getFullYear(),
+      establishedYear: Number.isInteger(yearEstablished) && yearEstablished > 0 ? yearEstablished : new Date().getFullYear(),
+      createdAt: new Date().toISOString(),
+      createdBy: "Current director",
     }
 
     setSchools((current) => [school, ...current])
@@ -75,16 +205,20 @@ export function SchoolManagement() {
 
   const handleExport = () => {
     const rows = [
-      ["School", "Town or city", "County", "Head teacher", "Students", "Teachers", "Performance", "Status", "Email", "Phone"],
+      ["School", "Level", "Ownership", "Town or city", "County", "NEMIS code", "Ministry registration", "Head teacher", "Students", "Teachers", "Performance", "Status", "Email", "Phone"],
       ...filteredSchools.map((school) => [
         school.name,
+        school.registrationDetails?.schoolLevel ?? "",
+        school.registrationDetails?.ownership ?? "",
         school.location,
         school.county,
+        school.registrationDetails?.nemisCode ?? "",
+        school.registrationDetails?.ministryRegistrationNumber ?? "",
         school.headTeacher,
         school.studentsCount,
         school.teachersCount,
         `${school.performanceIndex}%`,
-        school.status,
+        school.registrationDetails?.systemStatus ?? school.status,
         school.contactEmail,
         school.contactPhone,
       ]),
@@ -192,8 +326,8 @@ export function SchoolManagement() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={school.status === "active" ? "default" : "secondary"}>
-                        {school.status === "active" ? "Active" : "Under review"}
+                      <Badge variant={school.status === "active" ? "default" : school.status === "suspended" ? "destructive" : "secondary"}>
+                        {school.registrationDetails?.systemStatus ?? (school.status === "active" ? "Active" : school.status === "suspended" ? "Suspended" : "Under review")}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -225,52 +359,14 @@ export function SchoolManagement() {
       <AddSchoolDialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} onAdd={handleAddSchool} />
 
       <Dialog open={Boolean(selectedSchool)} onOpenChange={(open) => !open && setSelectedSchool(null)}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="max-h-[90dvh] sm:max-w-4xl">
           {selectedSchool && (
             <>
               <DialogHeader>
                 <DialogTitle>{selectedSchool.name}</DialogTitle>
                 <DialogDescription>{selectedSchool.location}, {selectedSchool.county}</DialogDescription>
               </DialogHeader>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="grid gap-1">
-                  <span className="text-sm font-medium">Head teacher</span>
-                  <p className="text-sm text-muted-foreground">{selectedSchool.headTeacher}</p>
-                </div>
-                <div className="grid gap-1">
-                  <span className="text-sm font-medium">Established</span>
-                  <p className="text-sm text-muted-foreground">{selectedSchool.establishedYear}</p>
-                </div>
-                <div className="grid gap-1">
-                  <span className="text-sm font-medium">Students and teachers</span>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedSchool.studentsCount.toLocaleString("en-KE")} students · {selectedSchool.teachersCount.toLocaleString("en-KE")} teachers
-                  </p>
-                </div>
-                <div className="grid gap-1">
-                  <span className="text-sm font-medium">Status</span>
-                  <p className="text-sm capitalize text-muted-foreground">{selectedSchool.status}</p>
-                </div>
-                <div className="grid gap-1">
-                  <span className="text-sm font-medium">Contact</span>
-                  {selectedSchool.contactEmail ? (
-                    <a className="flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline" href={`mailto:${selectedSchool.contactEmail}`}>
-                      <Mail aria-hidden="true" className="size-4" />
-                      {selectedSchool.contactEmail}
-                    </a>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No email recorded</p>
-                  )}
-                  {selectedSchool.contactPhone ? (
-                    <a className="flex items-center gap-2 text-sm text-primary underline-offset-4 hover:underline" href={`tel:${selectedSchool.contactPhone}`}>
-                      <Phone aria-hidden="true" className="size-4" />
-                      {selectedSchool.contactPhone}
-                    </a>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No phone recorded</p>
-                  )}
-                </div>
-              </div>
+              <SchoolDetailsContent school={selectedSchool} />
             </>
           )}
         </DialogContent>

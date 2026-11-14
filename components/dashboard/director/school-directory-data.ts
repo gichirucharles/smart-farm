@@ -49,7 +49,61 @@ export const KENYAN_COUNTIES = [
 ] as const
 
 export type KenyanCounty = (typeof KENYAN_COUNTIES)[number]
-export type SchoolStatus = "active" | "under review"
+export type SchoolStatus = "active" | "under review" | "suspended"
+export type SchoolLevel =
+  | "Pre-primary"
+  | "Primary"
+  | "Junior Secondary"
+  | "Senior Secondary"
+  | "TVET"
+  | "Combined"
+export type SchoolOwnership = "Public" | "Private" | "Faith-based / sponsored" | "International"
+export type SchoolGender = "Boys" | "Girls" | "Mixed"
+export type BoardingStatus = "Day" | "Boarding" | "Mixed"
+export type SchoolCurriculum = "CBC" | "8-4-4" | "IGCSE" | "IB" | "Other"
+export type SchoolRegistrationStatus = "Active" | "Pending verification" | "Suspended"
+export type SchoolDocumentKey = "registrationCertificate" | "operatingLicense" | "kraCertificate" | "logo"
+export type SchoolDocumentUploads = Record<SchoolDocumentKey, File | null>
+
+export interface SchoolRegistrationDetails {
+  schoolLevel: SchoolLevel | ""
+  ownership: SchoolOwnership | ""
+  genderType: SchoolGender | ""
+  boardingStatus: BoardingStatus | ""
+  curriculum: SchoolCurriculum | ""
+  curriculumOther: string
+  nemisCode: string
+  knecCenterCode: string
+  ministryRegistrationNumber: string
+  registrationExpiryDate: string
+  kraPin: string
+  businessRegistrationNumber: string
+  sponsorOwnerName: string
+  subCounty: string
+  ward: string
+  physicalAddress: string
+  nearestLandmark: string
+  gpsCoordinates: string
+  postalAddress: string
+  headTeacherPhone: string
+  headTeacherEmail: string
+  tscNumber: string
+  boardChairName: string
+  boardChairPhone: string
+  boardChairEmail: string
+  yearEstablished: string
+  streamsPerClass: string
+  studentsCount: string
+  teachersCount: string
+  academicYear: string
+  schoolMotto: string
+  assignedDirector: string
+  schoolAdminEmail: string
+  schoolAdminPhone: string
+  licenseStatus: SchoolRegistrationStatus
+  systemStatus: SchoolRegistrationStatus
+  documents: SchoolDocumentUploads
+}
 
 export interface School {
   id: string
@@ -66,12 +120,15 @@ export interface School {
   contactPhone: string
   website: string
   establishedYear: number
+  registrationDetails?: SchoolRegistrationDetails
+  createdAt?: string
+  createdBy?: string
 }
 
 export type NewSchoolDraft = Pick<
   School,
   "name" | "location" | "county" | "headTeacher" | "contactEmail" | "contactPhone"
->
+> & { registrationDetails: SchoolRegistrationDetails }
 
 export const INITIAL_SCHOOLS: School[] = [
   {
