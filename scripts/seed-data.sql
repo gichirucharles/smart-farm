@@ -1,13 +1,3 @@
--- Insert system admin
-INSERT INTO users (id, email, password_hash, role, first_name, last_name, is_first_login) VALUES
-('550e8400-e29b-41d4-a716-446655440010', 'charlesmuiruri024@gmail.com', '$2b$12$XF7Ol7y7v0d7X9jqJ8K8ju9KjK8J7i6H5G4F3E2D1C0B9A8Z7Y6X5', 'system_admin', 'Charles', 'Muiruri', false)
-ON CONFLICT (email) DO UPDATE SET 
-  password_hash = '$2b$12$XF7Ol7y7v0d7X9jqJ8K8ju9KjK8J7i6H5G4F3E2D1C0B9A8Z7Y6X5',
-  role = 'system_admin',
-  first_name = 'Charles',
-  last_name = 'Muiruri',
-  is_first_login = false;
-
 -- Insert sample schools
 INSERT INTO schools (id, name, address, phone, email, registration_number, subscription_plan, subscription_status) VALUES
 ('550e8400-e29b-41d4-a716-446655440001', 'Greenwood Academy', '123 Education Street, Nairobi', '+254712345678', 'info@greenwood.ac.ke', 'SCH001', 'premium', 'active'),
