@@ -296,9 +296,10 @@ export function RoleBasedNavigation() {
   }
 
   const normalizedRole = user.role.trim().toLowerCase().replace(/[\s-]+/g, "_")
+  const navigationRole = normalizedRole === "teacher" ? "class_teacher" : normalizedRole
   const navigationConfig =
     roleNavigationConfig[user.role as keyof typeof roleNavigationConfig] ??
-    roleNavigationConfig[normalizedRole as keyof typeof roleNavigationConfig]
+    roleNavigationConfig[navigationRole as keyof typeof roleNavigationConfig]
 
   if (!navigationConfig) {
     return null
