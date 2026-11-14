@@ -71,7 +71,7 @@ export default function DirectorDashboardPage() {
               </Card>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-6 xl:grid-cols-2">
               <SchoolManagement />
               <DirectorAcademicPerformance />
             </div>

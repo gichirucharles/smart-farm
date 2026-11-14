@@ -322,9 +322,8 @@ export function RoleBasedNavigation() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
-                  const isMessages = item.url.includes("messages")
                   const isNotifications = item.url.includes("notifications")
-                  const unreadCount = isMessages ? 2 : isNotifications ? 2 : 0
+                  const unreadCount = isNotifications ? 2 : 0
 
                   return (
                     <SidebarMenuItem key={item.title}>
