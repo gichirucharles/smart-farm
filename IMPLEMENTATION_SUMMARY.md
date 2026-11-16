@@ -3,18 +3,11 @@
 ## Overview
 This document summarizes the implementation of advanced school management features for the ShuleVerse system, including system admin credentials, role management, teacher reassignment workflows, and the Kenyan grading system.
 
-## 1. System Admin Credentials Setup
+## 1. System Administrator Access
 
-### Credentials
-- **Email**: charlesmuiruri024@gmail.com
-- **Password**: Maryalvin1985@
-- **Role**: System Administrator
+System administrator accounts must be provisioned through a protected administrative process. Never commit account credentials, password hashes, or scripts that create or reset privileged accounts.
 
-### Implementation
-- Updated `scripts/update-admin-credentials.sql` with bcrypt hashed password
-- System admin has full access to all school management features
-- Can add all sections of school management at all levels
-- Can assign and manage responsibilities across the entire system
+A system administrator has full access to school management features and can manage responsibilities across the system.
 
 ## 2. Role Assignment & Responsibility Management
 
@@ -170,10 +163,9 @@ scripts/
 ## 8. Usage Examples
 
 ### For System Admin
-1. Login with charlesmuiruri024@gmail.com / Maryalvin1985@
-2. Navigate to Role Management section
-3. Assign roles to teachers
-4. Handle role reassignments with approval workflow
+1. Sign in using credentials provisioned through a protected administrative process.
+2. Navigate to Role Management.
+3. Assign roles to teachers and handle role reassignments through the approval workflow.
 
 ### For Subject Teachers
 1. Login to teacher dashboard
