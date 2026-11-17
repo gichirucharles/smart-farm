@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UserProfileHeader } from "@/components/layout/user-profile-header"
 import { HeadTeacherOverview } from "@/components/dashboard/head-teacher/overview"
+import { StudentManagement } from "@/components/dashboard/students/student-management"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 
@@ -64,32 +65,7 @@ export default function HeadTeacherDashboardPage() {
           </TabsContent>
 
           <TabsContent value="students" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Student Statistics</CardTitle>
-                <CardDescription>By grade level</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[
-                    { grade: "Grade 1", students: 55, present: 52, absent: 3 },
-                    { grade: "Grade 2", students: 58, present: 56, absent: 2 },
-                    { grade: "Grade 3", students: 60, present: 57, absent: 3 },
-                  ].map((item) => (
-                    <div key={item.grade} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{item.grade}</p>
-                        <p className="text-xs text-muted-foreground">{item.students} students</p>
-                      </div>
-                      <div className="text-right text-sm">
-                        <p className="text-green-600">Present: {item.present}</p>
-                        <p className="text-red-600">Absent: {item.absent}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <StudentManagement title="Student management" description="School-wide student profiles, admission information, family contacts and support records." />
           </TabsContent>
 
           <TabsContent value="exams" className="space-y-6">

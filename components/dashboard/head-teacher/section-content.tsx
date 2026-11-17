@@ -1,5 +1,7 @@
 import { AcademicPerformance } from "@/components/dashboard/academic-performance"
+import { ClassStructureOverview } from "@/components/dashboard/head-teacher/class-structure-overview"
 import { MessagesPanel } from "@/components/dashboard/messages-panel"
+import { StudentManagement } from "@/components/dashboard/students/student-management"
 import { SchoolCalendar } from "@/components/dashboard/school-calendar"
 import { StaffManagement } from "@/components/dashboard/staff-management"
 import { Badge } from "@/components/ui/badge"
@@ -82,35 +84,11 @@ function SectionTable({ title, description, columns, rows }: SectionTableProps) 
 }
 
 function StudentsSection() {
-  return (
-    <SectionTable
-      title="Student Management"
-      description="School-wide student roster across current classes."
-      columns={["Admission No.", "Student", "Class", "Status"]}
-      rows={[
-        { id: "stu-1041", cells: ["ST-1041", "Amina Kariuki", "Grade 4A", "Active"] },
-        { id: "stu-1088", cells: ["ST-1088", "Brian Omondi", "Grade 5B", "Active"] },
-        { id: "stu-1126", cells: ["ST-1126", "Catherine Njeri", "Grade 6A", "Active"] },
-        { id: "stu-1193", cells: ["ST-1193", "David Kipchoge", "Grade 7A", "Active"] },
-      ]}
-    />
-  )
+  return <StudentManagement title="Student management" description="School-wide student profiles, admission information, family contacts and support records." />
 }
 
 function ClassesSection() {
-  return (
-    <SectionTable
-      title="Class Management"
-      description="Review class groups, enrolment, and assigned class teachers."
-      columns={["Class", "Level", "Students", "Class teacher", "Status"]}
-      rows={[
-        { id: "class-1a", cells: ["Grade 1A", "Lower primary", "32", "Jane Wanjiru", "Active"] },
-        { id: "class-3b", cells: ["Grade 3B", "Lower primary", "35", "Peter Otieno", "Active"] },
-        { id: "class-5a", cells: ["Grade 5A", "Upper primary", "38", "Mary Njeri", "Active"] },
-        { id: "class-7a", cells: ["Grade 7A", "Junior school", "34", "James Kamau", "Active"] },
-      ]}
-    />
-  )
+  return <ClassStructureOverview />
 }
 
 function AttendanceSection() {

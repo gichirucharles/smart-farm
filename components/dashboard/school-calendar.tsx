@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import useSWR from "swr"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar } from "@/components/ui/calendar"
 import { Button } from "@/components/ui/button"
@@ -8,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Tabs, TabsContent } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Download, CalendarIcon, Clock, MapPin, Users, BookOpen, GraduationCap, Trophy, Flag } from "lucide-react"
+import { Download, CalendarIcon, Clock, MapPin, Users, BookOpen, GraduationCap, Trophy, Flag } from "lucide-react"
 
 interface CalendarEvent {
   id: string
@@ -21,96 +22,56 @@ interface CalendarEvent {
   description: string
 }
 
+interface SharedCalendarSettings {
+  settings?: {
+    academicYear?: string
+    terms?: Array<{ id: string; name: string; startDate: string; endDate: string }>
+    holidays?: Array<{ id: string; name: string; date: string; description: string }>
+  }
+}
+
+const fetchCalendarSettings = async (url: string): Promise<SharedCalendarSettings> => {
+  const response = await fetch(url, { credentials: "same-origin", cache: "no-store" })
+  if (!response.ok) throw new Error("Unable to load the school calendar")
+  return response.json()
+}
+
+function parseLocalDate(value: string) {
+  const [year, month, day] = value.split("-").map(Number)
+  if (!year || !month || !day) return null
+  return new Date(year, month - 1, day)
+}
+
 export function SchoolCalendar() {
+  const { data: calendarData, error: calendarError } = useSWR<SharedCalendarSettings>("/api/school-settings", fetchCalendarSettings)
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [selectedView, setSelectedView] = useState<"month" | "list" | "upcoming">("month")
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
   const [isEventDetailsOpen, setIsEventDetailsOpen] = useState(false)
 
-  // Mock calendar events
-  const events: CalendarEvent[] = [
-    {
-      id: "evt1",
-      title: "End of Term Exams",
-      date: new Date(2023, 5, 15), // June 15, 2023
-      startTime: "08:00",
-      endTime: "16:00",
-      location: "All Classrooms",
-      category: "exam",
-      description: "Final examinations for all subjects for Term 2.",
-    },
-    {
-      id: "evt2",
-      title: "Parent-Teacher Meeting",
-      date: new Date(2023, 5, 20), // June 20, 2023
-      startTime: "14:00",
-      endTime: "17:00",
-      location: "School Auditorium",
-      category: "meeting",
-      description: "Quarterly parent-teacher meeting to discuss student progress.",
-    },
-    {
-      id: "evt3",
-      title: "Sports Day",
-      date: new Date(2023, 5, 25), // June 25, 2023
-      startTime: "09:00",
-      endTime: "15:00",
-      location: "School Grounds",
-      category: "sports",
-      description: "Annual sports day with various athletic competitions.",
-    },
-    {
-      id: "evt4",
-      title: "School Holiday - Independence Day",
-      date: new Date(2023, 6, 7), // July 7, 2023
+  const termEvents: CalendarEvent[] = (calendarData?.settings?.terms ?? []).flatMap((term) => {
+    const events: CalendarEvent[] = []
+    const startDate = parseLocalDate(term.startDate)
+    const endDate = parseLocalDate(term.endDate)
+    if (startDate) events.push({ id: `${term.id}-start`, title: `${term.name} begins`, date: startDate, startTime: "08:00", endTime: "08:00", location: "School", category: "academic", description: `First day of ${term.name}.` })
+    if (endDate) events.push({ id: `${term.id}-end`, title: `${term.name} ends`, date: endDate, startTime: "15:00", endTime: "15:00", location: "School", category: "academic", description: `Last day of ${term.name}.` })
+    return events
+  })
+  const holidayEvents: CalendarEvent[] = (calendarData?.settings?.holidays ?? []).flatMap((holiday) => {
+    const holidayDate = parseLocalDate(holiday.date)
+    return holidayDate ? [{
+      id: holiday.id,
+      title: holiday.name,
+      date: holidayDate,
       startTime: "00:00",
       endTime: "23:59",
-      location: "N/A",
-      category: "holiday",
-      description: "School closed for Independence Day celebrations.",
-    },
-    {
-      id: "evt5",
-      title: "Science Fair",
-      date: new Date(2023, 6, 15), // July 15, 2023
-      startTime: "10:00",
-      endTime: "15:00",
-      location: "School Hall",
-      category: "academic",
-      description: "Annual science fair showcasing student projects.",
-    },
-    {
-      id: "evt6",
-      title: "Cultural Day",
-      date: new Date(2023, 6, 22), // July 22, 2023
-      startTime: "13:00",
-      endTime: "17:00",
-      location: "School Auditorium",
-      category: "cultural",
-      description: "Celebration of cultural diversity with performances and exhibitions.",
-    },
-    {
-      id: "evt7",
-      title: "Staff Development Day",
-      date: new Date(2023, 7, 5), // August 5, 2023
-      startTime: "09:00",
-      endTime: "16:00",
-      location: "Conference Room",
-      category: "meeting",
-      description: "Professional development workshop for all teaching staff.",
-    },
-    {
-      id: "evt8",
-      title: "Mid-Term Break",
-      date: new Date(2023, 7, 10), // August 10, 2023
-      startTime: "00:00",
-      endTime: "23:59",
-      location: "N/A",
-      category: "holiday",
-      description: "Mid-term break for all students and staff.",
-    },
-  ]
+      location: "School closed",
+      category: "holiday" as const,
+      description: holiday.description,
+    }] : []
+  })
+  const events: CalendarEvent[] = [...termEvents, ...holidayEvents]
 
   // Filter events based on selected category
   const filteredEvents =
@@ -193,12 +154,13 @@ export function SchoolCalendar() {
 
   return (
     <div className="space-y-4">
+      {calendarError && <p role="alert" className="text-sm text-destructive">School calendar settings are unavailable. Sign in again to view shared dates.</p>}
       <Card>
         <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <CardTitle>School Calendar</CardTitle>
-              <CardDescription>View and manage school events and activities</CardDescription>
+              <CardDescription>{calendarData?.settings?.academicYear ? `Shared school dates · ${calendarData.settings.academicYear}` : "School holidays and term dates"}</CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -228,10 +190,6 @@ export function SchoolCalendar() {
                 </Button>
               </div>
 
-              <Button size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Event
-              </Button>
             </div>
           </div>
         </CardHeader>
