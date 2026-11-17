@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UserProfileHeader } from "@/components/layout/user-profile-header"
+import { HeadTeacherOverview } from "@/components/dashboard/head-teacher/overview"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 
@@ -15,7 +16,7 @@ const performanceData = [
 
 export default function HeadTeacherDashboardPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-screen w-full min-w-0 flex-col">
       <UserProfileHeader
         name="Mr. Robert Kipchoge"
         role="Head Teacher"
@@ -23,9 +24,9 @@ export default function HeadTeacherDashboardPage() {
         avatarUrl="/placeholder.svg?height=40&width=40"
       />
 
-      <main className="flex-1 p-6 space-y-6">
+      <main className="min-w-0 flex-1 space-y-6 p-4 sm:p-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Head Teacher Dashboard</h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Head Teacher Dashboard</h1>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
@@ -37,44 +38,7 @@ export default function HeadTeacherDashboardPage() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle>Total Classes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">12</div>
-                  <p className="text-xs text-muted-foreground">Grade 1-12</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle>Total Students</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">654</div>
-                  <p className="text-xs text-muted-foreground">Active enrollment</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle>Teaching Staff</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">48</div>
-                  <p className="text-xs text-muted-foreground">All departments</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle>Avg. Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold">73%</div>
-                  <p className="text-xs text-muted-foreground">Current term</p>
-                </CardContent>
-              </Card>
-            </div>
+            <HeadTeacherOverview />
           </TabsContent>
 
           <TabsContent value="performance" className="space-y-6">
