@@ -37,151 +37,38 @@ export function normalizePhoneNumber(phone: string): string {
   return cleanPhone
 }
 
-// System Admin Authentication
+async function authenticateWithServer(identifier: string, password: string, role: string) {
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({ identifier, password, role }),
+    })
+    const result = await response.json()
+    if (!response.ok || !result.success || !result.user) {
+      return { success: false, error: result.error ?? "Invalid credentials" }
+    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem("userSession", JSON.stringify(result.user))
+    }
+    return result
+  } catch (error) {
+    console.error("Authentication request failed:", error)
+    return { success: false, error: "Authentication failed" }
+  }
+}
+
 export async function authenticateSystemAdmin(email: string, password: string) {
-  try {
-    const { data: user, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", email)
-      .eq("role", "system_admin")
-      .single()
-
-    if (error || !user) {
-      return { success: false, error: "Invalid credentials" }
-    }
-
-    const isValidPassword = await verifyPassword(password, user.password_hash)
-    if (!isValidPassword) {
-      return { success: false, error: "Invalid credentials" }
-    }
-
-    // Update last login
-    await supabase.from("users").update({ last_login: new Date().toISOString() }).eq("id", user.id)
-
-    const session = {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      isFirstLogin: user.is_first_login,
-    }
-
-    // Store session
-    if (typeof window !== "undefined") {
-      localStorage.setItem("userSession", JSON.stringify(session))
-    }
-
-    return { success: true, user: session, requiresPasswordChange: user.is_first_login }
-  } catch (error) {
-    console.error("System admin authentication error:", error)
-    return { success: false, error: "Authentication failed" }
-  }
+  return authenticateWithServer(email, password, "system_admin")
 }
 
-// School Staff Authentication (Director, Head Teacher, etc.)
 export async function authenticateSchoolStaff(email: string, password: string, role: string) {
-  try {
-    const { data: user, error } = await supabase
-      .from("users")
-      .select(`
-        *,
-        schools (
-          id,
-          name,
-          registration_number,
-          subscription_status
-        )
-      `)
-      .eq("email", email)
-      .eq("role", role)
-      .single()
-
-    if (error || !user) {
-      return { success: false, error: "Invalid credentials" }
-    }
-
-    const isValidPassword = await verifyPassword(password, user.password_hash)
-    if (!isValidPassword) {
-      return { success: false, error: "Invalid credentials" }
-    }
-
-    // Update last login
-    await supabase.from("users").update({ last_login: new Date().toISOString() }).eq("id", user.id)
-
-    const session = {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      schoolId: user.school_id,
-      isFirstLogin: user.is_first_login,
-      school: user.schools,
-    }
-
-    // Store session
-    if (typeof window !== "undefined") {
-      localStorage.setItem("userSession", JSON.stringify(session))
-    }
-
-    return { success: true, user: session, requiresPasswordChange: user.is_first_login }
-  } catch (error) {
-    console.error("School staff authentication error:", error)
-    return { success: false, error: "Authentication failed" }
-  }
+  return authenticateWithServer(email, password, role)
 }
 
-// Parent Authentication (Email or Phone)
 export async function authenticateParent(identifier: string, password: string) {
-  try {
-    // Check if identifier is email or phone
-    const isEmail = identifier.includes("@")
-    const query = supabase.from("users").select("*").eq("role", "parent")
-
-    if (isEmail) {
-      query.eq("email", identifier)
-    } else {
-      const normalizedPhone = normalizePhoneNumber(identifier)
-      query.eq("phone", normalizedPhone)
-    }
-
-    const { data: user, error } = await query.single()
-
-    if (error || !user) {
-      return { success: false, error: "Invalid credentials" }
-    }
-
-    const isValidPassword = await verifyPassword(password, user.password_hash)
-    if (!isValidPassword) {
-      return { success: false, error: "Invalid credentials" }
-    }
-
-    // Update last login
-    await supabase.from("users").update({ last_login: new Date().toISOString() }).eq("id", user.id)
-
-    const session = {
-      id: user.id,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      schoolId: user.school_id,
-      isFirstLogin: user.is_first_login,
-    }
-
-    // Store session
-    if (typeof window !== "undefined") {
-      localStorage.setItem("userSession", JSON.stringify(session))
-    }
-
-    return { success: true, user: session, requiresPasswordChange: user.is_first_login }
-  } catch (error) {
-    console.error("Parent authentication error:", error)
-    return { success: false, error: "Authentication failed" }
-  }
+  return authenticateWithServer(identifier, password, "parent")
 }
 
 // Parent Registration (Email or Phone)
@@ -325,6 +212,7 @@ export function getCurrentUser() {
 export function logout() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("userSession")
+    void fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" })
   }
 }
 

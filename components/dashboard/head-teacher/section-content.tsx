@@ -1,4 +1,5 @@
 import { AcademicPerformance } from "@/components/dashboard/academic-performance"
+import { ClassStructureOverview } from "@/components/dashboard/head-teacher/class-structure-overview"
 import { MessagesPanel } from "@/components/dashboard/messages-panel"
 import { SchoolCalendar } from "@/components/dashboard/school-calendar"
 import { StaffManagement } from "@/components/dashboard/staff-management"
@@ -98,19 +99,7 @@ function StudentsSection() {
 }
 
 function ClassesSection() {
-  return (
-    <SectionTable
-      title="Class Management"
-      description="Review class groups, enrolment, and assigned class teachers."
-      columns={["Class", "Level", "Students", "Class teacher", "Status"]}
-      rows={[
-        { id: "class-1a", cells: ["Grade 1A", "Lower primary", "32", "Jane Wanjiru", "Active"] },
-        { id: "class-3b", cells: ["Grade 3B", "Lower primary", "35", "Peter Otieno", "Active"] },
-        { id: "class-5a", cells: ["Grade 5A", "Upper primary", "38", "Mary Njeri", "Active"] },
-        { id: "class-7a", cells: ["Grade 7A", "Junior school", "34", "James Kamau", "Active"] },
-      ]}
-    />
-  )
+  return <ClassStructureOverview />
 }
 
 function AttendanceSection() {

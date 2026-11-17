@@ -106,6 +106,7 @@ const roleNavigationConfig = {
         label: "School Management",
         items: [
           { title: "Dashboard", url: "/dashboard/head-teacher", icon: Home },
+          { title: "School Settings", url: "/dashboard/head-teacher/settings", icon: Settings },
           { title: "Staff Management", url: "/dashboard/head-teacher/staff", icon: Users },
           { title: "Student Management", url: "/dashboard/head-teacher/students", icon: GraduationCap },
           { title: "Academic Performance", url: "/dashboard/head-teacher/academics", icon: BarChart3 },
@@ -253,6 +254,7 @@ export function RoleBasedNavigation() {
   const handleLogout = () => {
     localStorage.removeItem("userSession")
     localStorage.removeItem("user")
+    void fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" })
     router.replace("/")
   }
 
