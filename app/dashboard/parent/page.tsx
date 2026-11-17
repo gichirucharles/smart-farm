@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { StudentManagement } from "@/components/dashboard/students/student-management"
 import {
   User,
   BookOpen,
@@ -270,6 +271,7 @@ export default function ParentDashboard() {
             <TabsTrigger value="messages" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Messages ({unreadMessageCount})</TabsTrigger>
             <TabsTrigger value="calendar" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Calendar</TabsTrigger>
             <TabsTrigger value="notifications" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Notifications ({unreadNotificationCount})</TabsTrigger>
+            <TabsTrigger value="student-records" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Student records</TabsTrigger>
           </TabsList>
 
           <TabsContent value="academic" className="space-y-6">
@@ -450,6 +452,10 @@ export default function ParentDashboard() {
                 ))}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="student-records" className="space-y-6">
+            <StudentManagement title="My child&apos;s records" description="View student information and health records associated with your guardian email." />
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">
