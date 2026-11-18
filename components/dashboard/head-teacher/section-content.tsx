@@ -4,6 +4,7 @@ import { MessagesPanel } from "@/components/dashboard/messages-panel"
 import { StudentManagement } from "@/components/dashboard/students/student-management"
 import { SchoolCalendar } from "@/components/dashboard/school-calendar"
 import { StaffManagement } from "@/components/dashboard/staff-management"
+import { HROperations } from "@/components/dashboard/head-teacher/hr-operations"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -23,6 +24,7 @@ import {
 
 export const headTeacherSections = [
   "staff",
+  "hr-operations",
   "students",
   "academics",
   "classes",
@@ -141,6 +143,8 @@ export function HeadTeacherSectionContent({ section }: { section: HeadTeacherSec
   switch (section) {
     case "staff":
       return <StaffManagement />
+    case "hr-operations":
+      return <HROperations />
     case "students":
       return <StudentsSection />
     case "academics":

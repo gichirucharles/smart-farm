@@ -6,6 +6,7 @@ import { UserProfileHeader } from "@/components/layout/user-profile-header"
 import { HeadTeacherOverview } from "@/components/dashboard/head-teacher/overview"
 import { StudentManagement } from "@/components/dashboard/students/student-management"
 import { StaffManagement } from "@/components/dashboard/staff-management"
+import { HROperations } from "@/components/dashboard/head-teacher/hr-operations"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 
@@ -37,6 +38,7 @@ export default function HeadTeacherDashboardPage() {
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="staff">Staff</TabsTrigger>
+            <TabsTrigger value="hr-operations">HR operations</TabsTrigger>
             <TabsTrigger value="exams">Exams</TabsTrigger>
           </TabsList>
 
@@ -72,6 +74,10 @@ export default function HeadTeacherDashboardPage() {
 
           <TabsContent value="staff" className="space-y-6">
             <StaffManagement />
+          </TabsContent>
+
+          <TabsContent value="hr-operations" className="space-y-6">
+            <HROperations />
           </TabsContent>
 
           <TabsContent value="exams" className="space-y-6">
