@@ -93,6 +93,7 @@ const roleNavigationConfig = {
         label: "Administration",
         items: [
           { title: "Network Settings", url: "/dashboard/director/network-settings", icon: Settings },
+          { title: "Attendance", url: "/dashboard/director/attendance", icon: UserCheck },
           { title: "Reports", url: "/dashboard/director/reports", icon: FileText },
           { title: "Messages", url: "/dashboard/director/messages", icon: MessageSquare },
         ],
