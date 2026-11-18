@@ -108,6 +108,7 @@ const roleNavigationConfig = {
           { title: "Dashboard", url: "/dashboard/head-teacher", icon: Home },
           { title: "School Settings", url: "/dashboard/head-teacher/settings", icon: Settings },
           { title: "Staff Management", url: "/dashboard/head-teacher/staff", icon: Users },
+          { title: "HR Operations", url: "/dashboard/head-teacher/hr-operations", icon: ClipboardList },
           { title: "Student Management", url: "/dashboard/head-teacher/students", icon: GraduationCap },
           { title: "Academic Performance", url: "/dashboard/head-teacher/academics", icon: BarChart3 },
           { title: "Class Management", url: "/dashboard/head-teacher/classes", icon: BookOpen },
