@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UserProfileHeader } from "@/components/layout/user-profile-header"
 import { HeadTeacherOverview } from "@/components/dashboard/head-teacher/overview"
 import { StudentManagement } from "@/components/dashboard/students/student-management"
+import { StaffManagement } from "@/components/dashboard/staff-management"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 
@@ -35,6 +36,7 @@ export default function HeadTeacherDashboardPage() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
+            <TabsTrigger value="staff">Staff</TabsTrigger>
             <TabsTrigger value="exams">Exams</TabsTrigger>
           </TabsList>
 
@@ -66,6 +68,10 @@ export default function HeadTeacherDashboardPage() {
 
           <TabsContent value="students" className="space-y-6">
             <StudentManagement title="Student management" description="School-wide student profiles, admission information, family contacts and support records." />
+          </TabsContent>
+
+          <TabsContent value="staff" className="space-y-6">
+            <StaffManagement />
           </TabsContent>
 
           <TabsContent value="exams" className="space-y-6">
