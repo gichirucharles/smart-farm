@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SubjectTeacherClassSwitcher } from '@/components/dashboard/subject-teacher/class-switcher'
 import { BarChart3, Users, BookOpen, Calendar } from 'lucide-react'
+import { AcademicOperations } from '@/components/dashboard/academic-operations'
 
 export default function SubjectTeacherDashboard() {
   return (
@@ -61,6 +62,8 @@ export default function SubjectTeacherDashboard() {
       <div>
         <SubjectTeacherClassSwitcher />
       </div>
+
+      <AcademicOperations role="teacher" />
     </div>
   )
 }

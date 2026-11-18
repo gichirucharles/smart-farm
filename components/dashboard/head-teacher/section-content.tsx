@@ -1,10 +1,10 @@
-import { AcademicPerformance } from "@/components/dashboard/academic-performance"
 import { ClassStructureOverview } from "@/components/dashboard/head-teacher/class-structure-overview"
 import { MessagesPanel } from "@/components/dashboard/messages-panel"
 import { StudentManagement } from "@/components/dashboard/students/student-management"
 import { SchoolCalendar } from "@/components/dashboard/school-calendar"
 import { StaffManagement } from "@/components/dashboard/staff-management"
 import { HROperations } from "@/components/dashboard/head-teacher/hr-operations"
+import { AcademicOperations } from "@/components/dashboard/academic-operations"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -148,7 +148,7 @@ export function HeadTeacherSectionContent({ section }: { section: HeadTeacherSec
     case "students":
       return <StudentsSection />
     case "academics":
-      return <AcademicPerformance />
+      return <AcademicOperations role="headteacher" />
     case "classes":
       return <ClassesSection />
     case "attendance":

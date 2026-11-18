@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UserProfileHeader } from "@/components/layout/user-profile-header"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { AcademicOperations } from "@/components/dashboard/academic-operations"
 
 export const metadata: Metadata = {
   title: "Class Teacher Dashboard | ShuleVerse",
@@ -202,6 +203,8 @@ export default function ClassTeacherDashboardPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <AcademicOperations role="teacher" />
       </main>
     </div>
   )
