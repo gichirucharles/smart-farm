@@ -5,6 +5,7 @@ import { SchoolCalendar } from "@/components/dashboard/school-calendar"
 import { StaffManagement } from "@/components/dashboard/staff-management"
 import { HROperations } from "@/components/dashboard/head-teacher/hr-operations"
 import { AcademicOperations } from "@/components/dashboard/academic-operations"
+import { ExamManagementDashboard } from "@/components/dashboard/head-teacher/exam-management"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -110,18 +111,7 @@ function AttendanceSection() {
 }
 
 function ExaminationsSection() {
-  return (
-    <SectionTable
-      title="Examinations"
-      description="Upcoming examinations and candidate counts."
-      columns={["Examination", "Classes", "Date", "Candidates", "Status"]}
-      rows={[
-        { id: "exam-term", cells: ["End-of-term exams", "Grades 4–8", "Nov 18, 2026", "184", "Scheduled"] },
-        { id: "exam-practical", cells: ["Practical assessments", "Grades 3–6", "Nov 20, 2026", "147", "Scheduled"] },
-        { id: "exam-reading", cells: ["Reading assessment", "Grades 1–2", "Nov 24, 2026", "64", "Draft"] },
-      ]}
-    />
-  )
+  return <ExamManagementDashboard />
 }
 
 function ReportsSection() {
