@@ -110,7 +110,7 @@ const roleNavigationConfig = {
           { title: "Staff Management", url: "/dashboard/head-teacher/staff", icon: Users },
           { title: "HR Operations", url: "/dashboard/head-teacher/hr-operations", icon: ClipboardList },
           { title: "Student Management", url: "/dashboard/head-teacher/students", icon: GraduationCap },
-          { title: "Academic Performance", url: "/dashboard/head-teacher/academics", icon: BarChart3 },
+          { title: "Academic Operations", url: "/dashboard/head-teacher/academics", icon: BookOpen },
           { title: "Class Management", url: "/dashboard/head-teacher/classes", icon: BookOpen },
         ],
       },
@@ -137,6 +137,7 @@ const roleNavigationConfig = {
           { title: "Students", url: "/dashboard/class-teacher/students", icon: GraduationCap },
           { title: "Attendance", url: "/dashboard/class-teacher/attendance", icon: UserCheck },
           { title: "Assessment", url: "/dashboard/class-teacher/assessment", icon: ClipboardList },
+          { title: "Teaching & Learning", url: "/dashboard/class-teacher/academic-operations", icon: BookOpen },
         ],
       },
       {
@@ -193,6 +194,7 @@ const roleNavigationConfig = {
           { title: "Students", url: "/dashboard/subject-teacher/students", icon: GraduationCap },
           { title: "Attendance", url: "/dashboard/subject-teacher/attendance", icon: UserCheck },
           { title: "Assessment", url: "/dashboard/subject-teacher/assessment", icon: ClipboardList },
+          { title: "Teaching & Learning", url: "/dashboard/subject-teacher/academic-operations", icon: BookOpen },
         ],
       },
       {
