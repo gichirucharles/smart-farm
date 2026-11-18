@@ -6,6 +6,7 @@ import { StaffManagement } from "@/components/dashboard/staff-management"
 import { HROperations } from "@/components/dashboard/head-teacher/hr-operations"
 import { AcademicOperations } from "@/components/dashboard/academic-operations"
 import { ExamManagementDashboard } from "@/components/dashboard/head-teacher/exam-management"
+import { AttendanceDashboard } from "@/components/dashboard/attendance-dashboard"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -95,19 +96,7 @@ function ClassesSection() {
 }
 
 function AttendanceSection() {
-  return (
-    <SectionTable
-      title="Attendance"
-      description="Daily attendance snapshot across school classes."
-      columns={["Date", "Class", "Present", "Absent", "Rate"]}
-      rows={[
-        { id: "att-1a", cells: ["Today", "Grade 1A", "30 / 32", "2", "93.8%"] },
-        { id: "att-3b", cells: ["Today", "Grade 3B", "34 / 35", "1", "97.1%"] },
-        { id: "att-5a", cells: ["Today", "Grade 5A", "36 / 38", "2", "94.7%"] },
-        { id: "att-7a", cells: ["Today", "Grade 7A", "33 / 34", "1", "97.1%"] },
-      ]}
-    />
-  )
+  return <AttendanceDashboard role="headteacher" />
 }
 
 function ExaminationsSection() {
