@@ -100,6 +100,19 @@ const roleNavigationConfig = {
       },
     ],
   },
+  accountant: {
+    title: "Accountant Dashboard",
+    groups: [
+      {
+        label: "Finance Management",
+        items: [
+          { title: "Dashboard", url: "/dashboard/accountant", icon: Home },
+          { title: "Fee Management", url: "/dashboard/accountant", icon: DollarSign },
+          { title: "Financial Reports", url: "/dashboard/director/financial-overview", icon: BarChart3 },
+        ],
+      },
+    ],
+  },
   head_teacher: {
     title: "Head Teacher Dashboard",
     groups: [

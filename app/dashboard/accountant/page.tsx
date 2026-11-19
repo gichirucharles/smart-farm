@@ -1,4 +1,5 @@
 import { FinanceOverview } from "@/components/dashboard/finance-overview"
+import { FinanceOperations } from "@/components/dashboard/finance-operations"
 
 export default function AccountantDashboardPage() {
   return (
@@ -9,10 +10,11 @@ export default function AccountantDashboardPage() {
           Financial reporting in Kenyan shillings (KSh).
         </p>
         <p className="text-sm text-muted-foreground">
-          Live fee schedules, invoices, receipts, balances, arrears, and student credits for your school.
+          Fee collection, school accounts, budgets, grants, procurement, petty cash, and payroll summaries.
         </p>
       </header>
       <FinanceOverview />
+      <FinanceOperations />
     </main>
   )
 }
