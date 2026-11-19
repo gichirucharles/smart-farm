@@ -1,5 +1,6 @@
 import { ClassStructureOverview } from "@/components/dashboard/head-teacher/class-structure-overview"
 import { MessagesPanel } from "@/components/dashboard/messages-panel"
+import { CommunicationCenter } from "@/components/dashboard/head-teacher/communication-center"
 import { StudentManagement } from "@/components/dashboard/students/student-management"
 import { SchoolCalendar } from "@/components/dashboard/school-calendar"
 import { StaffManagement } from "@/components/dashboard/staff-management"
@@ -35,6 +36,7 @@ export const headTeacherSections = [
   "reports",
   "calendar",
   "messages",
+  "communication",
 ] as const
 
 export type HeadTeacherSection = (typeof headTeacherSections)[number]
@@ -140,5 +142,7 @@ export function HeadTeacherSectionContent({ section }: { section: HeadTeacherSec
       return <SchoolCalendar />
     case "messages":
       return <MessagesPanel />
+    case "communication":
+      return <CommunicationCenter />
   }
 }

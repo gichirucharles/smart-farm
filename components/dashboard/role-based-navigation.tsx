@@ -47,6 +47,7 @@ import {
   TrendingUp,
   DollarSign,
   Activity,
+  Bell,
 } from "lucide-react"
 
 interface User {
@@ -136,6 +137,7 @@ const roleNavigationConfig = {
           { title: "Reports", url: "/dashboard/head-teacher/reports", icon: FileText },
           { title: "Calendar", url: "/dashboard/head-teacher/calendar", icon: Calendar },
           { title: "Messages", url: "/dashboard/head-teacher/messages", icon: MessageSquare },
+          { title: "Communication", url: "/dashboard/head-teacher/communication", icon: Bell },
         ],
       },
     ],

@@ -9,6 +9,7 @@ import { StaffManagement } from "@/components/dashboard/staff-management"
 import { HROperations } from "@/components/dashboard/head-teacher/hr-operations"
 import { FinanceOverview } from "@/components/dashboard/finance-overview"
 import { FinanceOperations } from "@/components/dashboard/finance-operations"
+import { CommunicationCenter } from "@/components/dashboard/head-teacher/communication-center"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 
@@ -43,6 +44,7 @@ export default function HeadTeacherDashboardPage() {
             <TabsTrigger value="hr-operations">HR operations</TabsTrigger>
             <TabsTrigger value="finance">Finance</TabsTrigger>
             <TabsTrigger value="exams">Exams</TabsTrigger>
+            <TabsTrigger value="communication">Communication</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -86,6 +88,10 @@ export default function HeadTeacherDashboardPage() {
           <TabsContent value="finance" className="space-y-6">
             <FinanceOverview />
             <FinanceOperations />
+          </TabsContent>
+
+          <TabsContent value="communication" className="space-y-6">
+            <CommunicationCenter />
           </TabsContent>
 
           <TabsContent value="exams" className="space-y-6">
