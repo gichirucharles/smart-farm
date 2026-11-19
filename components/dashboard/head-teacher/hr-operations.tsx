@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -40,11 +41,6 @@ const trainingLogs = [
   { title: "CBC assessment and reporting", staff: "Sarah Njoroge", date: "Nov 10, 2026", hours: "6 hrs", status: "Completed" },
   { title: "First aid refresher", staff: "Daniel Mwangi", date: "Nov 21, 2026", hours: "4 hrs", status: "Upcoming" },
   { title: "Inclusive classroom practice", staff: "Peter Omondi", date: "Oct 30, 2026", hours: "8 hrs", status: "Completed" },
-]
-
-const disciplineCases = [
-  { reference: "HR-026", category: "Attendance review", opened: "Nov 11, 2026", stage: "Meeting scheduled" },
-  { reference: "HR-024", category: "Conduct review", opened: "Oct 28, 2026", stage: "Under review" },
 ]
 
 function StatusBadge({ status }: { status: string }) {
@@ -108,7 +104,7 @@ export function HROperations() {
         </TabsContent>
 
         <TabsContent value="discipline">
-          <Card><CardHeader><CardTitle>Disciplinary records</CardTitle><CardDescription>Restricted case tracking for authorized school leadership.</CardDescription></CardHeader><CardContent><div className="mb-4 flex items-start gap-3 rounded-md border p-3 text-sm"><ShieldAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" /><p>Staff identities and case details are withheld in this prototype. Do not add allegations or sensitive notes to sample records.</p></div><div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Reference</TableHead><TableHead>Case category</TableHead><TableHead>Opened</TableHead><TableHead>Stage</TableHead></TableRow></TableHeader><TableBody>{disciplineCases.map((item) => <TableRow key={item.reference}><TableCell className="font-medium">{item.reference}</TableCell><TableCell>{item.category}</TableCell><TableCell>{item.opened}</TableCell><TableCell><StatusBadge status={item.stage} /></TableCell></TableRow>)}</TableBody></Table></div></CardContent></Card>
+          <Card><CardHeader><CardTitle>Student discipline &amp; welfare</CardTitle><CardDescription>Open the school-scoped student register to record incidents, committee decisions, sanctions, safeguarding actions, and commendations.</CardDescription></CardHeader><CardContent><div className="flex flex-col items-start gap-4 rounded-md border p-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-start gap-3 text-sm"><ShieldAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" /><p>Student welfare cases are maintained separately from staff HR records. Counseling notes remain counselor-only.</p></div><Button asChild variant="outline"><Link href="/dashboard/head-teacher/discipline-welfare">Open welfare register</Link></Button></div></CardContent></Card>
         </TabsContent>
 
         <TabsContent value="training">
