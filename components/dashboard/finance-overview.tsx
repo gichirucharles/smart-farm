@@ -1,775 +1,106 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import type { FormEvent, ReactNode } from "react"
+import useSWR from "swr"
 import { formatKSH } from "@/lib/currency"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Progress } from "@/components/ui/progress"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Download,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  CreditCard,
-  FileText,
-  Search,
-  Filter,
-  Calendar,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react"
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-} from "recharts"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { toast } from "@/hooks/use-toast"
+import { AlertCircle, ArrowDownLeft, BadgeCheck, CircleDollarSign, FileText, LoaderCircle, Plus, RefreshCw, Search, Wallet } from "lucide-react"
+
+type FinanceData = {
+  classes: { id: string; name: string }[]
+  students: { id: string; student_id: string; first_name: string; last_name: string; className: string; studentCategory: string }[]
+  schedules: { id: string; class_id: string; term: string; academic_year: string; student_category: string; name: string; amount: number; due_date: string | null; is_active: boolean }[]
+  invoices: { id: string; invoice_number: string; student_id: string; studentName: string; admissionNumber: string; className: string; term: string; academic_year: string; issued_on: string; due_date: string | null; status: string; total: number; paid: number; balance: number; isOverdue: boolean; payments: { id: string; amount: number; payment_method: string; reference: string | null; receipt_number: string; paid_at: string }[] }[]
+  payments: { id: string; invoice_id: string; amount: number; payment_method: string; reference: string | null; receipt_number: string; paid_at: string }[]
+  adjustments: { id: string; invoice_id: string; adjustment_type: string; amount: number; reason: string; status: string; created_at: string }[]
+  summary: { invoiced: number; collected: number; outstanding: number; overdue: number; invoiceCount: number }
+}
+const fetcher = async (url: string): Promise<FinanceData> => {
+  const response = await fetch(url, { cache: "no-store" })
+  const data = await response.json()
+  if (!response.ok) throw new Error(data.error || "Unable to load finance records")
+  return data
+}
 
 export function FinanceOverview() {
-  const [selectedPeriod, setSelectedPeriod] = useState("current-term")
-  const [selectedCategory, setSelectedCategory] = useState("all")
+  const { data, error, isLoading, mutate } = useSWR<FinanceData>("/api/finance", fetcher)
   const [activeTab, setActiveTab] = useState("overview")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [search, setSearch] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [classId, setClassId] = useState("")
+  const [studentCategory, setStudentCategory] = useState("day")
+  const [adjustmentInvoice, setAdjustmentInvoice] = useState("")
+  const filteredInvoices = useMemo(() => (data?.invoices ?? []).filter((invoice) => `${invoice.studentName} ${invoice.admissionNumber} ${invoice.invoice_number}`.toLowerCase().includes(search.toLowerCase())), [data?.invoices, search])
+  const className = (id: string) => data?.classes.find((schoolClass) => schoolClass.id === id)?.name ?? "Class"
 
-  // Mock financial data
-  const financialSummary = {
-    totalRevenue: 125000,
-    totalExpenses: 98500,
-    balance: 26500,
-    feeCollection: 112000,
-    feeTarget: 150000,
-    collectionRate: 74.67,
-    outstandingFees: 38000,
-    recentTransactions: [
-      {
-        id: "tr1",
-        date: "2023-06-15",
-        description: "Fee Payment - Grade 5",
-        amount: 5000,
-        type: "income",
-        category: "fees",
-        status: "completed",
-      },
-      {
-        id: "tr2",
-        date: "2023-06-14",
-        description: "Stationery Supplies",
-        amount: 1200,
-        type: "expense",
-        category: "supplies",
-        status: "completed",
-      },
-      {
-        id: "tr3",
-        date: "2023-06-12",
-        description: "Staff Salaries",
-        amount: 45000,
-        type: "expense",
-        category: "salaries",
-        status: "completed",
-      },
-      {
-        id: "tr4",
-        date: "2023-06-10",
-        description: "Fee Payment - Grade 3",
-        amount: 4500,
-        type: "income",
-        category: "fees",
-        status: "completed",
-      },
-      {
-        id: "tr5",
-        date: "2023-06-08",
-        description: "Maintenance",
-        amount: 2500,
-        type: "expense",
-        category: "maintenance",
-        status: "completed",
-      },
-    ],
-    expenseBreakdown: [
-      { name: "Salaries", value: 65000 },
-      { name: "Supplies", value: 12000 },
-      { name: "Maintenance", value: 8500 },
-      { name: "Utilities", value: 7000 },
-      { name: "Other", value: 6000 },
-    ],
-    incomeBreakdown: [
-      { name: "Tuition Fees", value: 112000 },
-      { name: "Registration", value: 8000 },
-      { name: "Donations", value: 3000 },
-      { name: "Other", value: 2000 },
-    ],
-    monthlyTrend: [
-      { month: "Jan", income: 42000, expenses: 35000 },
-      { month: "Feb", income: 38000, expenses: 32000 },
-      { month: "Mar", income: 45000, expenses: 36000 },
-      { month: "Apr", income: 40000, expenses: 34000 },
-      { month: "May", income: 43000, expenses: 37000 },
-      { month: "Jun", income: 47000, expenses: 39000 },
-    ],
-    feesByClass: [
-      { class: "Grade 1", collected: 18000, target: 25000, rate: 72 },
-      { class: "Grade 2", collected: 16500, target: 22000, rate: 75 },
-      { class: "Grade 3", collected: 19000, target: 24000, rate: 79.2 },
-      { class: "Grade 4", collected: 17500, target: 23000, rate: 76.1 },
-      { class: "Grade 5", collected: 20000, target: 28000, rate: 71.4 },
-      { class: "Grade 6", collected: 21000, target: 28000, rate: 75 },
-    ],
+  async function submitForm(event: FormEvent<HTMLFormElement>, action: "create_schedule" | "adjustment") {
+    event.preventDefault()
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
+    const payload = action === "create_schedule" ? { action, classId, term: form.get("term"), academicYear: form.get("academicYear"), studentCategory, name: form.get("name"), amount: Number(form.get("amount")), dueDate: form.get("dueDate") || null } : { action, invoiceId: adjustmentInvoice, adjustmentType: form.get("adjustmentType"), amount: Number(form.get("amount")), reason: form.get("reason") }
+    setSaving(true)
+    try {
+      const response = await fetch("/api/finance", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || "Unable to save finance record")
+      toast({ title: action === "create_schedule" ? "Fee schedule saved" : "Credit adjustment applied" })
+      formElement.reset()
+      await mutate()
+    } catch (submitError) {
+      toast({ title: "Unable to save finance record", description: submitError instanceof Error ? submitError.message : "Please try again.", variant: "destructive" })
+    } finally { setSaving(false) }
   }
 
-  // Colors for pie chart
-  const COLORS = ["#4f46e5", "#22c55e", "#eab308", "#f97316", "#ef4444", "#8b5cf6"]
+  if (isLoading) return <div className="flex min-h-48 items-center justify-center text-muted-foreground"><LoaderCircle className="mr-2 size-4 animate-spin" />Loading school finance…</div>
+  if (error) return <Alert variant="destructive"><AlertCircle className="size-4" /><AlertDescription className="flex items-center justify-between gap-4">{error.message}<Button variant="outline" size="sm" onClick={() => void mutate()}><RefreshCw data-icon="inline-start" />Retry</Button></AlertDescription></Alert>
+  if (!data) return null
 
-  // Filter transactions based on search query and category
-  const filteredTransactions = financialSummary.recentTransactions.filter((transaction) => {
-    const matchesSearch = transaction.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || transaction.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+  return <section className="flex flex-col gap-5">
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Metric title="Collected" value={data.summary.collected} icon={<ArrowDownLeft />} note={`${data.payments.length} recorded payments`} /><Metric title="Outstanding" value={data.summary.outstanding} icon={<Wallet />} note={`${data.summary.overdue} overdue invoices`} alert={data.summary.overdue > 0} /><Metric title="Invoiced" value={data.summary.invoiced} icon={<FileText />} note={`${data.summary.invoiceCount} issued invoices`} /><Card><CardHeader className="pb-2"><CardDescription>Collection rate</CardDescription><CardTitle className="text-2xl">{data.summary.invoiced ? `${Math.round(data.summary.collected / data.summary.invoiced * 100)}%` : "—"}</CardTitle></CardHeader><CardContent><p className="text-xs text-muted-foreground">Based on recorded invoices and payments</p></CardContent></Card></div>
+    <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-5"><TabsTrigger value="overview">Overview</TabsTrigger><TabsTrigger value="invoices">Invoices & arrears</TabsTrigger><TabsTrigger value="payments">Payments & receipts</TabsTrigger><TabsTrigger value="fees">Fee schedules</TabsTrigger><TabsTrigger value="support">Bursaries & waivers</TabsTrigger></TabsList>
+      <TabsContent value="overview" className="flex flex-col gap-4 pt-4"><Card><CardHeader><CardTitle>Collection pulse</CardTitle><CardDescription>Live totals from this school&apos;s issued invoices and receipt ledger.</CardDescription></CardHeader><CardContent className="grid gap-6 md:grid-cols-[1fr_1.3fr]"><div className="flex flex-col gap-3 rounded-lg border p-4"><p className="text-sm font-medium">Outstanding balance</p><p className="text-3xl font-semibold">{formatKSH(data.summary.outstanding)}</p><p className="text-sm text-muted-foreground">Across {data.invoices.filter((invoice) => invoice.balance > 0).length} unpaid invoices</p><Button variant="outline" className="mt-1 w-fit" onClick={() => setActiveTab("invoices")}>Review arrears</Button></div><div className="flex flex-col gap-3"><div className="flex items-center justify-between"><h3 className="font-medium">Recent receipts</h3><Button variant="ghost" size="sm" onClick={() => setActiveTab("payments")}>View all</Button></div>{data.payments.slice(0, 4).map((payment) => { const invoice = data.invoices.find((entry) => entry.id === payment.invoice_id); return <div key={payment.id} className="flex items-center justify-between gap-3 border-b pb-3 last:border-0"><div className="min-w-0"><p className="truncate text-sm font-medium">{invoice?.studentName ?? "Student"}</p><p className="text-xs text-muted-foreground">{payment.receipt_number} · {payment.payment_method}{payment.reference ? ` · ${payment.reference}` : ""}</p></div><p className="shrink-0 text-sm font-semibold">{formatKSH(Number(payment.amount))}</p></div> })}{!data.payments.length && <p className="text-sm text-muted-foreground">No payments recorded yet.</p>}</div></CardContent></Card><Card><CardHeader><CardTitle>Students with overdue balances</CardTitle><CardDescription>Review overdue invoices and follow up with guardians.</CardDescription></CardHeader><CardContent><InvoiceTable invoices={data.invoices.filter((invoice) => invoice.isOverdue).slice(0, 6)} /></CardContent></Card></TabsContent>
+      <TabsContent value="invoices" className="pt-4"><Card><CardHeader><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><CardTitle>Invoices & arrears</CardTitle><CardDescription>Search by learner, admission number, or invoice number.</CardDescription></div><div className="relative w-full sm:max-w-xs"><Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" /><Input className="pl-9" aria-label="Search invoices" placeholder="Search invoices" value={search} onChange={(event) => setSearch(event.target.value)} /></div></div></CardHeader><CardContent><InvoiceTable invoices={filteredInvoices} /></CardContent></Card></TabsContent>
+      <TabsContent value="payments" className="pt-4"><Card><CardHeader><CardTitle>Payments & receipts</CardTitle><CardDescription>Recorded payment channels, transaction references, and receipt numbers.</CardDescription></CardHeader><CardContent><PaymentTable data={data} /></CardContent></Card></TabsContent>
+      <TabsContent value="fees" className="flex flex-col gap-4 pt-4"><Card><CardHeader><CardTitle>Create fee schedule</CardTitle><CardDescription>Define charges by class, term, year, and day or boarding category.</CardDescription></CardHeader><CardContent><form className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" onSubmit={(event) => void submitForm(event, "create_schedule")}><div className="flex flex-col gap-2"><Label htmlFor="schedule-class">Class</Label><Select value={classId} onValueChange={setClassId} required><SelectTrigger id="schedule-class"><SelectValue placeholder="Choose class" /></SelectTrigger><SelectContent>{data.classes.map((item) => <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>)}</SelectContent></Select></div><Field label="Fee name" name="name" placeholder="Tuition" required /><Field label="Academic year" name="academicYear" placeholder="2026" required /><Field label="Term" name="term" placeholder="Term 1" required /><div className="flex flex-col gap-2"><Label htmlFor="fee-category">Student category</Label><Select value={studentCategory} onValueChange={setStudentCategory}><SelectTrigger id="fee-category"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="day">Day</SelectItem><SelectItem value="boarding">Boarding</SelectItem></SelectContent></Select></div><Field label="Amount (KSh)" name="amount" type="number" min="0.01" step="0.01" required /><Field label="Due date" name="dueDate" type="date" /><div className="flex items-end"><Button type="submit" disabled={saving || !classId}>{saving ? <LoaderCircle data-icon="inline-start" className="animate-spin" /> : <Plus data-icon="inline-start" />}Save fee schedule</Button></div></form></CardContent></Card><Card><CardHeader><CardTitle>Active fee schedules</CardTitle><CardDescription>{data.schedules.length} schedules recorded.</CardDescription></CardHeader><CardContent><div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Fee item</TableHead><TableHead>Class</TableHead><TableHead>Term / year</TableHead><TableHead>Category</TableHead><TableHead>Due date</TableHead><TableHead className="text-right">Amount</TableHead></TableRow></TableHeader><TableBody>{data.schedules.map((schedule) => <TableRow key={schedule.id}><TableCell className="font-medium">{schedule.name}</TableCell><TableCell>{className(schedule.class_id)}</TableCell><TableCell>{schedule.term} · {schedule.academic_year}</TableCell><TableCell><Badge variant="outline" className="capitalize">{schedule.student_category}</Badge></TableCell><TableCell>{schedule.due_date || "—"}</TableCell><TableCell className="text-right">{formatKSH(Number(schedule.amount))}</TableCell></TableRow>)}{!data.schedules.length && <EmptyRow columns={6} text="No fee schedules yet." />}</TableBody></Table></div></CardContent></Card></TabsContent>
+      <TabsContent value="support" className="flex flex-col gap-4 pt-4"><Card><CardHeader><CardTitle>Apply bursary, scholarship, discount, or waiver</CardTitle><CardDescription>Credits are recorded against an issued invoice and capped at its remaining balance.</CardDescription></CardHeader><CardContent><form className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" onSubmit={(event) => void submitForm(event, "adjustment")}><div className="flex flex-col gap-2 sm:col-span-2"><Label htmlFor="adjustment-invoice">Invoice</Label><Select value={adjustmentInvoice} onValueChange={setAdjustmentInvoice} required><SelectTrigger id="adjustment-invoice"><SelectValue placeholder="Choose an invoice with a balance" /></SelectTrigger><SelectContent>{data.invoices.filter((invoice) => invoice.balance > 0).map((invoice) => <SelectItem key={invoice.id} value={invoice.id}>{invoice.invoice_number} · {invoice.studentName} · {formatKSH(invoice.balance)} due</SelectItem>)}</SelectContent></Select></div><div className="flex flex-col gap-2"><Label htmlFor="adjustment-type">Credit type</Label><Select name="adjustmentType" defaultValue="bursary"><SelectTrigger id="adjustment-type"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="bursary">Bursary</SelectItem><SelectItem value="scholarship">Scholarship</SelectItem><SelectItem value="discount">Discount</SelectItem><SelectItem value="waiver">Waiver</SelectItem></SelectContent></Select></div><Field label="Amount (KSh)" name="amount" type="number" min="0.01" step="0.01" required /><div className="flex flex-col gap-2 sm:col-span-2"><Label htmlFor="adjustment-reason">Reason</Label><Input id="adjustment-reason" name="reason" maxLength={500} required placeholder="Document why this credit is being applied" /></div><div className="flex items-end"><Button type="submit" disabled={saving || !adjustmentInvoice}>{saving ? <LoaderCircle data-icon="inline-start" className="animate-spin" /> : <BadgeCheck data-icon="inline-start" />}Apply credit</Button></div></form></CardContent></Card><Card><CardHeader><CardTitle>Recent student credits</CardTitle><CardDescription>Approved adjustments on school invoices.</CardDescription></CardHeader><CardContent><div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Type</TableHead><TableHead>Invoice</TableHead><TableHead>Reason</TableHead><TableHead>Date</TableHead><TableHead className="text-right">Amount</TableHead></TableRow></TableHeader><TableBody>{data.adjustments.map((item) => <TableRow key={item.id}><TableCell><Badge variant="secondary" className="capitalize">{item.adjustment_type}</Badge></TableCell><TableCell>{data.invoices.find((invoice) => invoice.id === item.invoice_id)?.invoice_number ?? "Invoice"}</TableCell><TableCell>{item.reason}</TableCell><TableCell>{new Date(item.created_at).toLocaleDateString()}</TableCell><TableCell className="text-right">{formatKSH(Number(item.amount))}</TableCell></TableRow>)}{!data.adjustments.length && <EmptyRow columns={5} text="No student credits recorded." />}</TableBody></Table></div></CardContent></Card></TabsContent>
+    </Tabs>
+  </section>
+}
 
-  const formatCurrency = (amount: number) => formatKSH(amount)
+export function ParentFinance() {
+  const { data, error, isLoading, mutate } = useSWR<FinanceData>("/api/finance", fetcher)
+  if (isLoading) return <div className="flex min-h-32 items-center justify-center text-muted-foreground"><LoaderCircle className="mr-2 size-4 animate-spin" />Loading fee records…</div>
+  if (error) return <Alert variant="destructive"><AlertCircle className="size-4" /><AlertDescription className="flex items-center justify-between gap-4">{error.message}<Button variant="outline" size="sm" onClick={() => void mutate()}>Retry</Button></AlertDescription></Alert>
+  if (!data) return null
+  const balance = data.invoices.reduce((sum, invoice) => sum + invoice.balance, 0)
+  const paid = data.invoices.reduce((sum, invoice) => sum + invoice.paid, 0)
+  return <div className="flex flex-col gap-4"><div className="grid gap-3 sm:grid-cols-3"><Metric title="Outstanding balance" value={balance} icon={<Wallet />} note="Across linked student accounts" alert={balance > 0} /><Metric title="Total paid" value={paid} icon={<ArrowDownLeft />} note="School-recorded payments" /><Metric title="Invoices" value={data.invoices.length} icon={<FileText />} note={`${data.invoices.filter((invoice) => invoice.isOverdue).length} overdue`} /></div><Card><CardHeader><CardTitle>Fee balances</CardTitle><CardDescription>Invoices for students linked to your guardian account.</CardDescription></CardHeader><CardContent><InvoiceTable invoices={data.invoices} /></CardContent></Card><Card><CardHeader><CardTitle>Payment receipts</CardTitle><CardDescription>School-recorded payment channels and references.</CardDescription></CardHeader><CardContent><PaymentTable data={data} /></CardContent></Card></div>
+}
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-  }
-
-  return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <CardTitle>Finance Overview</CardTitle>
-              <CardDescription>School financial summary and management</CardDescription>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select period" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="current-term">Current Term</SelectItem>
-                  <SelectItem value="previous-term">Previous Term</SelectItem>
-                  <SelectItem value="current-year">Current Year</SelectItem>
-                  <SelectItem value="previous-year">Previous Year</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button variant="outline" size="sm">
-                <Calendar className="h-4 w-4 mr-2" />
-                Custom Range
-              </Button>
-
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 mb-4 lg:grid-cols-4">
-              <TabsTrigger className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight text-xs sm:text-sm" value="overview">Overview</TabsTrigger>
-              <TabsTrigger className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight text-xs sm:text-sm" value="transactions">Transactions</TabsTrigger>
-              <TabsTrigger className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight text-xs sm:text-sm" value="fee-collection">Fee Collection</TabsTrigger>
-              <TabsTrigger className="h-auto min-h-9 whitespace-normal px-2 py-2 text-center leading-tight text-xs sm:text-sm" value="reports">Financial Reports</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Total Revenue</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center">
-                      <div className="mr-4 rounded-full bg-green-100 p-2">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold">{formatCurrency(financialSummary.totalRevenue)}</div>
-                        <p className="text-xs text-gray-500">Current Term</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Total Expenses</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center">
-                      <div className="mr-4 rounded-full bg-red-100 p-2">
-                        <TrendingDown className="h-4 w-4 text-red-600" />
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold">{formatCurrency(financialSummary.totalExpenses)}</div>
-                        <p className="text-xs text-gray-500">Current Term</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Balance</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center">
-                      <div className="mr-4 rounded-full bg-blue-100 p-2">
-                        <DollarSign className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold">{formatCurrency(financialSummary.balance)}</div>
-                        <p className="text-xs text-gray-500">Current Term</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Income vs Expenses</CardTitle>
-                    <CardDescription>Monthly financial trend</CardDescription>
-                  </CardHeader>
-                  <CardContent className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={financialSummary.monthlyTrend}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis />
-                        <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                        <Legend />
-                        <Line
-                          type="monotone"
-                          dataKey="income"
-                          name="Income"
-                          stroke="#22c55e"
-                          strokeWidth={2}
-                          activeDot={{ r: 8 }}
-                        />
-                        <Line type="monotone" dataKey="expenses" name="Expenses" stroke="#ef4444" strokeWidth={2} />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Fee Collection</CardTitle>
-                    <CardDescription>Current term fee collection status</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium">Collection Rate</p>
-                          <p className="text-2xl font-bold">{financialSummary.collectionRate}%</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium">Collected / Target</p>
-                          <p className="text-sm">
-                            {formatCurrency(financialSummary.feeCollection)} /{" "}
-                            {formatCurrency(financialSummary.feeTarget)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <Progress value={financialSummary.collectionRate} className="h-2" />
-
-                      <div className="pt-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm font-medium">Outstanding Fees</p>
-                          <p className="text-sm font-bold text-red-600">
-                            {formatCurrency(financialSummary.outstandingFees)}
-                          </p>
-                        </div>
-                        <Button variant="outline" size="sm" className="w-full">
-                          <FileText className="h-4 w-4 mr-2" />
-                          View Fee Details
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Expense Breakdown</CardTitle>
-                    <CardDescription>Distribution of expenses by category</CardDescription>
-                  </CardHeader>
-                  <CardContent className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={financialSummary.expenseBreakdown}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={true}
-                          label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {financialSummary.expenseBreakdown.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Recent Transactions</CardTitle>
-                    <CardDescription>Latest financial activities</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {financialSummary.recentTransactions.slice(0, 4).map((transaction) => (
-                        <div key={transaction.id} className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div
-                              className={`mr-3 rounded-full p-2 ${
-                                transaction.type === "income" ? "bg-green-100" : "bg-red-100"
-                              }`}
-                            >
-                              {transaction.type === "income" ? (
-                                <ArrowUpRight className="h-4 w-4 text-green-600" />
-                              ) : (
-                                <ArrowDownRight className="h-4 w-4 text-red-600" />
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">{transaction.description}</p>
-                              <p className="text-xs text-gray-500">{formatDate(transaction.date)}</p>
-                            </div>
-                          </div>
-                          <p
-                            className={`font-medium ${
-                              transaction.type === "income" ? "text-green-600" : "text-red-600"
-                            }`}
-                          >
-                            {transaction.type === "income" ? "+" : "-"}
-                            {formatCurrency(transaction.amount)}
-                          </p>
-                        </div>
-                      ))}
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => setActiveTab("transactions")}
-                      >
-                        View All Transactions
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="transactions" className="space-y-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                      <CardTitle className="text-lg">All Transactions</CardTitle>
-                      <CardDescription>View and manage financial transactions</CardDescription>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="relative flex-1 min-w-[200px]">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search transactions..."
-                          className="pl-8"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                      </div>
-
-                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="w-[150px]">
-                          <SelectValue placeholder="Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Categories</SelectItem>
-                          <SelectItem value="fees">Fees</SelectItem>
-                          <SelectItem value="salaries">Salaries</SelectItem>
-                          <SelectItem value="supplies">Supplies</SelectItem>
-                          <SelectItem value="maintenance">Maintenance</SelectItem>
-                        </SelectContent>
-                      </Select>
-
-                      <Button variant="outline" size="sm">
-                        <Filter className="h-4 w-4 mr-2" />
-                        Filter
-                      </Button>
-
-                      <Button size="sm">
-                        <CreditCard className="h-4 w-4 mr-2" />
-                        New Transaction
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredTransactions.map((transaction) => (
-                        <TableRow key={transaction.id}>
-                          <TableCell>{formatDate(transaction.date)}</TableCell>
-                          <TableCell className="font-medium">{transaction.description}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="capitalize">
-                              {transaction.category}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={transaction.type === "income" ? "default" : "destructive"}
-                              className="capitalize"
-                            >
-                              {transaction.type}
-                            </Badge>
-                          </TableCell>
-                          <TableCell
-                            className={`font-medium ${
-                              transaction.type === "income" ? "text-green-600" : "text-red-600"
-                            }`}
-                          >
-                            {transaction.type === "income" ? "+" : "-"}
-                            {formatCurrency(transaction.amount)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="capitalize">
-                              {transaction.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm">
-                              View
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="fee-collection" className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Fee Collection</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm">Total Collected</p>
-                        <p className="font-bold">{formatCurrency(financialSummary.feeCollection)}</p>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm">Collection Target</p>
-                        <p className="font-medium">{formatCurrency(financialSummary.feeTarget)}</p>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm">Outstanding Fees</p>
-                        <p className="font-medium text-red-600">{formatCurrency(financialSummary.outstandingFees)}</p>
-                      </div>
-                      <div className="pt-2">
-                        <p className="text-sm mb-1">Collection Progress</p>
-                        <Progress value={financialSummary.collectionRate} className="h-2" />
-                        <p className="text-xs text-right mt-1">{financialSummary.collectionRate}% collected</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="md:col-span-2">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Fee Collection by Class</CardTitle>
-                    <CardDescription>Collection rates across different classes</CardDescription>
-                  </CardHeader>
-                  <CardContent className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={financialSummary.feesByClass}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="class" />
-                        <YAxis />
-                        <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                        <Legend />
-                        <Bar dataKey="collected" name="Collected" fill="#4f46e5" />
-                        <Bar dataKey="target" name="Target" fill="#94a3b8" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Fee Collection Details by Class</CardTitle>
-                  <CardDescription>Detailed breakdown of fee collection status</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Class</TableHead>
-                        <TableHead>Collected</TableHead>
-                        <TableHead>Target</TableHead>
-                        <TableHead>Outstanding</TableHead>
-                        <TableHead>Collection Rate</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {financialSummary.feesByClass.map((classData) => (
-                        <TableRow key={classData.class}>
-                          <TableCell className="font-medium">{classData.class}</TableCell>
-                          <TableCell>{formatCurrency(classData.collected)}</TableCell>
-                          <TableCell>{formatCurrency(classData.target)}</TableCell>
-                          <TableCell className="text-red-600">
-                            {formatCurrency(classData.target - classData.collected)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <Progress value={classData.rate} className="h-2 w-24" />
-                              <span className="text-sm">{classData.rate}%</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm">
-                              View Details
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="reports" className="space-y-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Financial Reports</CardTitle>
-                  <CardDescription>Access and generate financial reports</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Income Statement</CardTitle>
-                        <CardDescription>Summary of income and expenses</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm">Total Income</p>
-                            <p className="font-bold text-green-600">{formatCurrency(financialSummary.totalRevenue)}</p>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm">Total Expenses</p>
-                            <p className="font-bold text-red-600">{formatCurrency(financialSummary.totalExpenses)}</p>
-                          </div>
-                          <div className="flex justify-between items-center pt-2 border-t">
-                            <p className="text-sm font-medium">Net Income</p>
-                            <p className="font-bold">{formatCurrency(financialSummary.balance)}</p>
-                          </div>
-                          <Button variant="outline" size="sm" className="w-full">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Report
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Fee Collection Report</CardTitle>
-                        <CardDescription>Detailed fee collection status</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm">Total Collected</p>
-                            <p className="font-bold">{formatCurrency(financialSummary.feeCollection)}</p>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm">Outstanding Fees</p>
-                            <p className="font-bold text-red-600">{formatCurrency(financialSummary.outstandingFees)}</p>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm">Collection Rate</p>
-                            <p className="font-bold">{financialSummary.collectionRate}%</p>
-                          </div>
-                          <Button variant="outline" size="sm" className="w-full">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Report
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Expense Report</CardTitle>
-                        <CardDescription>Breakdown of expenses by category</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm">Total Expenses</p>
-                            <p className="font-bold text-red-600">{formatCurrency(financialSummary.totalExpenses)}</p>
-                          </div>
-                          <div className="space-y-2">
-                            {financialSummary.expenseBreakdown.map((expense, index) => (
-                              <div key={index} className="flex justify-between items-center">
-                                <p className="text-sm">{expense.name}</p>
-                                <p className="font-medium">{formatCurrency(expense.value)}</p>
-                              </div>
-                            ))}
-                          </div>
-                          <Button variant="outline" size="sm" className="w-full">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Report
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-base">Budget Analysis</CardTitle>
-                        <CardDescription>Comparison of actual vs budgeted expenses</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm">Budget Utilization</p>
-                            <p className="font-bold">82%</p>
-                          </div>
-                          <div className="pt-2">
-                            <p className="text-sm mb-1">Budget Progress</p>
-                            <Progress value={82} className="h-2" />
-                            <p className="text-xs text-right mt-1">82% of budget utilized</p>
-                          </div>
-                          <Button variant="outline" size="sm" className="w-full">
-                            <Download className="h-4 w-4 mr-2" />
-                            Download Report
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t">
-                    <h3 className="text-sm font-medium mb-3">Generate Custom Report</h3>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                      <div className="space-y-2">
-                        <Label htmlFor="report-type">Report Type</Label>
-                        <Select>
-                          <SelectTrigger id="report-type">
-                            <SelectValue placeholder="Select report type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="income-statement">Income Statement</SelectItem>
-                            <SelectItem value="fee-collection">Fee Collection</SelectItem>
-                            <SelectItem value="expense-report">Expense Report</SelectItem>
-                            <SelectItem value="budget-analysis">Budget Analysis</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="report-period">Period</Label>
-                        <Select>
-                          <SelectTrigger id="report-period">
-                            <SelectValue placeholder="Select period" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="current-term">Current Term</SelectItem>
-                            <SelectItem value="previous-term">Previous Term</SelectItem>
-                            <SelectItem value="current-year">Current Year</SelectItem>
-                            <SelectItem value="custom">Custom Range</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="report-format">Format</Label>
-                        <Select>
-                          <SelectTrigger id="report-format">
-                            <SelectValue placeholder="Select format" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pdf">PDF</SelectItem>
-                            <SelectItem value="excel">Excel</SelectItem>
-                            <SelectItem value="csv">CSV</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <Button className="mt-4">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Generate Report
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </div>
-  )
+function Metric({ title, value, icon, note, alert = false }: { title: string; value: number; icon: ReactNode; note: string; alert?: boolean }) {
+  return <Card><CardHeader className="flex flex-row items-center justify-between gap-2 pb-2"><CardDescription>{title}</CardDescription><span className={alert ? "text-destructive" : "text-muted-foreground"}>{icon}</span></CardHeader><CardContent><p className="text-2xl font-semibold">{formatKSH(value)}</p><p className="mt-1 text-xs text-muted-foreground">{note}</p></CardContent></Card>
+}
+function InvoiceTable({ invoices }: { invoices: FinanceData["invoices"] }) {
+  return <div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Invoice</TableHead><TableHead>Student</TableHead><TableHead>Class</TableHead><TableHead>Due date</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Invoiced</TableHead><TableHead className="text-right">Balance</TableHead></TableRow></TableHeader><TableBody>{invoices.map((invoice) => <TableRow key={invoice.id}><TableCell className="font-medium">{invoice.invoice_number}</TableCell><TableCell><div>{invoice.studentName}</div><div className="text-xs text-muted-foreground">{invoice.admissionNumber}</div></TableCell><TableCell>{invoice.className}</TableCell><TableCell>{invoice.due_date || "—"}</TableCell><TableCell><Badge variant={invoice.isOverdue ? "destructive" : invoice.balance > 0 ? "outline" : "secondary"}>{invoice.isOverdue ? "Overdue" : invoice.balance > 0 ? "Balance due" : "Paid"}</Badge></TableCell><TableCell className="text-right">{formatKSH(invoice.total)}</TableCell><TableCell className="text-right font-medium">{formatKSH(invoice.balance)}</TableCell></TableRow>)}{!invoices.length && <EmptyRow columns={7} text="No invoices match this view." />}</TableBody></Table></div>
+}
+function PaymentTable({ data }: { data: FinanceData }) {
+  return <div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>Receipt</TableHead><TableHead>Student</TableHead><TableHead>Paid on</TableHead><TableHead>Channel</TableHead><TableHead>Reference</TableHead><TableHead className="text-right">Amount</TableHead></TableRow></TableHeader><TableBody>{data.payments.map((payment) => { const invoice = data.invoices.find((entry) => entry.id === payment.invoice_id); return <TableRow key={payment.id}><TableCell className="font-medium">{payment.receipt_number}</TableCell><TableCell>{invoice?.studentName ?? "Student"}</TableCell><TableCell>{new Date(payment.paid_at).toLocaleDateString()}</TableCell><TableCell><Badge variant="secondary" className="capitalize">{payment.payment_method}</Badge></TableCell><TableCell>{payment.reference || "—"}</TableCell><TableCell className="text-right">{formatKSH(Number(payment.amount))}</TableCell></TableRow> })}{!data.payments.length && <EmptyRow columns={6} text="No payment receipts yet." />}</TableBody></Table></div>
+}
+function Field({ label, name, placeholder, type = "text", required = false, min, step }: { label: string; name: string; placeholder?: string; type?: string; required?: boolean; min?: string; step?: string }) {
+  const id = `finance-${name}`
+  return <div className="flex flex-col gap-2"><Label htmlFor={id}>{label}</Label><Input id={id} name={name} type={type} placeholder={placeholder} required={required} min={min} step={step} /></div>
+}
+function EmptyRow({ columns, text }: { columns: number; text: string }) {
+  return <TableRow><TableCell colSpan={columns} className="h-24 text-center text-muted-foreground"><CircleDollarSign className="mx-auto mb-2 size-5" />{text}</TableCell></TableRow>
 }
