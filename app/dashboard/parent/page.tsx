@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { StudentManagement } from "@/components/dashboard/students/student-management"
+import { ParentFinance } from "@/components/dashboard/finance-overview"
 import {
   User,
   BookOpen,
@@ -264,7 +265,7 @@ export default function ParentDashboard() {
 
         {/* Main Content Tabs - Updated with all sections */}
         <Tabs defaultValue="academic" className="space-y-6">
-          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 sm:grid-cols-3 lg:grid-cols-6">
+          <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 sm:grid-cols-3 lg:grid-cols-8">
             <TabsTrigger value="academic" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Academic Progress</TabsTrigger>
             <TabsTrigger value="attendance" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Attendance</TabsTrigger>
             <TabsTrigger value="assignments" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Assignments</TabsTrigger>
@@ -272,6 +273,7 @@ export default function ParentDashboard() {
             <TabsTrigger value="calendar" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Calendar</TabsTrigger>
             <TabsTrigger value="notifications" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Notifications ({unreadNotificationCount})</TabsTrigger>
             <TabsTrigger value="student-records" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">Student records</TabsTrigger>
+            <TabsTrigger value="school-fees" className="min-h-9 whitespace-normal px-2 py-2 text-center leading-tight">School fees</TabsTrigger>
           </TabsList>
 
           <TabsContent value="academic" className="space-y-6">
@@ -456,6 +458,10 @@ export default function ParentDashboard() {
 
           <TabsContent value="student-records" className="space-y-6">
             <StudentManagement title="My child&apos;s records" description="View student information and health records associated with your guardian email." />
+          </TabsContent>
+
+          <TabsContent value="school-fees" className="space-y-6">
+            <ParentFinance />
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-6">

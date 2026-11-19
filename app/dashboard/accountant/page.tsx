@@ -9,7 +9,7 @@ export default function AccountantDashboardPage() {
           Financial reporting in Kenyan shillings (KSh).
         </p>
         <p className="text-sm text-muted-foreground">
-          The figures shown here are sample data and are not connected to live school accounts.
+          Live fee schedules, invoices, receipts, balances, arrears, and student credits for your school.
         </p>
       </header>
       <FinanceOverview />
