@@ -48,6 +48,7 @@ import {
   DollarSign,
   Activity,
   Bell,
+  ShieldAlert,
 } from "lucide-react"
 
 interface User {
@@ -125,6 +126,7 @@ const roleNavigationConfig = {
           { title: "Staff Management", url: "/dashboard/head-teacher/staff", icon: Users },
           { title: "HR Operations", url: "/dashboard/head-teacher/hr-operations", icon: ClipboardList },
           { title: "Student Management", url: "/dashboard/head-teacher/students", icon: GraduationCap },
+          { title: "Discipline & Welfare", url: "/dashboard/head-teacher/discipline-welfare", icon: ShieldAlert },
           { title: "Academic Operations", url: "/dashboard/head-teacher/academics", icon: BookOpen },
           { title: "Class Management", url: "/dashboard/head-teacher/classes", icon: BookOpen },
         ],

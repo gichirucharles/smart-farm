@@ -8,6 +8,7 @@ import { HROperations } from "@/components/dashboard/head-teacher/hr-operations"
 import { AcademicOperations } from "@/components/dashboard/academic-operations"
 import { ExamManagementDashboard } from "@/components/dashboard/head-teacher/exam-management"
 import { AttendanceDashboard } from "@/components/dashboard/attendance-dashboard"
+import { DisciplineWelfare } from "@/components/dashboard/head-teacher/discipline-welfare"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -29,6 +30,7 @@ export const headTeacherSections = [
   "staff",
   "hr-operations",
   "students",
+  "discipline-welfare",
   "academics",
   "classes",
   "attendance",
@@ -128,6 +130,8 @@ export function HeadTeacherSectionContent({ section }: { section: HeadTeacherSec
       return <HROperations />
     case "students":
       return <StudentsSection />
+    case "discipline-welfare":
+      return <DisciplineWelfare />
     case "academics":
       return <AcademicOperations role="headteacher" />
     case "classes":
