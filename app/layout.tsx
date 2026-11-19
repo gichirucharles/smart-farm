@@ -6,8 +6,8 @@ import './globals.css'
 import { ThemePreferenceProvider } from '@/components/theme-preference-provider'
 
 export const metadata: Metadata = {
-  title: 'ShuleVerse',
-  description: 'A parent portal for school updates, student progress, and family communication.',
+  title: 'ShuleVerse | School Management',
+  description: 'Manage school operations, resources, facilities, student progress, and family communication with ShuleVerse.',
   generator: 'v0.app',
   icons: {
     icon: [
