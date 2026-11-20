@@ -11,26 +11,33 @@ const audit = async (schoolId: string | null, actorId: string, action: string, e
   await getSupabaseAdmin().from("governance_audit_log").insert({ school_id: schoolId, actor_id: actorId, action, entity_type: entityType, summary, entity_id: entityId ?? null })
 }
 
+async function canManageSchool(actor: NonNullable<Awaited<ReturnType<typeof getSessionActor>>>, schoolId: string) {
+  if (actor.schoolId === schoolId) return true
+  if (actor.role !== "director") return false
+  const { data, error } = await getSupabaseAdmin()
+    .from("user_school_assignments")
+    .select("id")
+    .eq("user_id", actor.id)
+    .eq("school_id", schoolId)
+    .eq("assigned_role", "director")
+    .maybeSingle()
+  return !error && Boolean(data)
+}
+
 export async function GET() {
   const actor = await getSessionActor()
   if (!actor) return response({ error: "Authentication required" }, 401)
   if (!["director", "head_teacher", "deputy_head_teacher"].includes(actor.role)) return response({ error: "Access denied" }, 403)
   const admin = getSupabaseAdmin()
-  const schoolQuery = admin.from("schools").select("id, name, county, director_id").order("name").limit(100)
-  let schoolsRaw: Array<{ id: string; name: string; county: string | null; director_id: string | null }> | null = null
-  let schoolError: { message: string } | null = null
-  if (actor.role === "director") {
-    const result = await schoolQuery.eq("director_id", actor.id)
-    schoolsRaw = result.data
-    schoolError = result.error
-  } else {
-    const { data: assigned, error: assignmentError } = await admin.from("user_school_assignments").select("school_id").eq("user_id", actor.id)
-    if (assignmentError) return response({ error: "Unable to load assigned schools" }, 500)
-    const assignedIds = [...new Set([actor.schoolId, ...(assigned ?? []).map((item) => item.school_id)].filter((id): id is string => Boolean(id)))]
-    const result = assignedIds.length ? await schoolQuery.in("id", assignedIds) : { data: [], error: null }
-    schoolsRaw = result.data
-    schoolError = result.error
-  }
+  const { data: assigned, error: assignmentError } = await admin
+    .from("user_school_assignments")
+    .select("school_id")
+    .eq("user_id", actor.id)
+  if (assignmentError) return response({ error: "Unable to load assigned schools" }, 500)
+  const assignedIds = [...new Set([actor.schoolId, ...(assigned ?? []).map((item) => item.school_id)].filter((id): id is string => Boolean(id)))]
+  const { data: schoolsRaw, error: schoolError } = assignedIds.length
+    ? await admin.from("schools").select("id, name, county").in("id", assignedIds).order("name").limit(100)
+    : { data: [], error: null }
   if (schoolError) return response({ error: "Unable to load school governance data" }, 500)
   const schools = schoolsRaw ?? []
   const schoolIds = schools.map((school) => school.id)
@@ -97,9 +104,8 @@ export async function POST(request: Request) {
   const escalationSchema = z.object({ action: z.literal("escalate"), schoolId: z.string().uuid(), subject: z.string().trim().min(2).max(160), details: z.string().trim().min(1).max(3000) }).strict()
   const escalation = escalationSchema.safeParse(raw)
   if (escalation.success) {
-    const { data: school } = await getSupabaseAdmin().from("schools").select("id, director_id").eq("id", escalation.data.schoolId).maybeSingle()
-    const authorized = actor.role === "director" ? school?.director_id === actor.id : actor.schoolId === escalation.data.schoolId
-    if (!authorized || !school) return response({ error: "You cannot escalate issues for this school" }, 403)
+    const { data: school } = await getSupabaseAdmin().from("schools").select("id").eq("id", escalation.data.schoolId).maybeSingle()
+    if (!school || !await canManageSchool(actor, escalation.data.schoolId)) return response({ error: "You cannot escalate issues for this school" }, 403)
     await audit(school.id, actor.id, "escalated", "escalation", `${escalation.data.subject}: ${escalation.data.details}`)
     return response({ success: true }, 201)
   }
@@ -107,9 +113,8 @@ export async function POST(request: Request) {
   const parsed = requestSchema.safeParse(raw)
   if (!parsed.success) return response({ error: "Check the approval request details" }, 400)
   const admin = getSupabaseAdmin()
-  const { data: school } = await admin.from("schools").select("id, director_id").eq("id", parsed.data.schoolId).maybeSingle()
-  const authorized = actor.role === "director" ? school?.director_id === actor.id : actor.schoolId === parsed.data.schoolId
-  if (!authorized || !school) return response({ error: "You cannot submit requests for this school" }, 403)
+  const { data: school } = await admin.from("schools").select("id").eq("id", parsed.data.schoolId).maybeSingle()
+  if (!school || !await canManageSchool(actor, parsed.data.schoolId)) return response({ error: "You cannot submit requests for this school" }, 403)
   const { data, error } = await admin.from("governance_approval_requests").insert({ school_id: parsed.data.schoolId, request_type: parsed.data.requestType, subject: parsed.data.subject, details: parsed.data.details, amount: parsed.data.amount ?? null, requested_by: actor.id }).select("id").single()
   if (error || !data) return response({ error: "Unable to submit approval request" }, 500)
   await audit(parsed.data.schoolId, actor.id, "created", "approval_request", `Submitted ${parsed.data.requestType.replaceAll("_", " ")}: ${parsed.data.subject}`, data.id)
@@ -145,8 +150,7 @@ export async function PATCH(request: Request) {
     if (actor.role !== "director") return response({ error: "Only the director can review approval requests" }, 403)
     const { data: approval } = await admin.from("governance_approval_requests").select("id, school_id, status").eq("id", parsed.data.id).maybeSingle()
     if (!approval || approval.status !== "pending") return response({ error: "This request is no longer pending" }, 409)
-    const { data: school } = await admin.from("schools").select("id").eq("id", approval.school_id).eq("director_id", actor.id).maybeSingle()
-    if (!school) return response({ error: "You cannot review this request" }, 403)
+    if (!await canManageSchool(actor, approval.school_id)) return response({ error: "You cannot review this request" }, 403)
     const { error } = await admin.from("governance_approval_requests").update({ status: parsed.data.status, review_note: parsed.data.note || null, reviewed_by: actor.id, reviewed_at: new Date().toISOString() }).eq("id", parsed.data.id).eq("status", "pending")
     if (error) return response({ error: "Unable to review approval request" }, 500)
     await audit(approval.school_id, actor.id, parsed.data.status, "approval_request", `${parsed.data.status === "approved" ? "Approved" : "Rejected"} an approval request`, approval.id)
@@ -166,10 +170,10 @@ export async function PUT(request: Request) {
   let imported = 0
   for (const item of input.data.assignments) {
     const [{ data: school }, { data: user }] = await Promise.all([
-      admin.from("schools").select("id").eq("id", item.schoolId).eq("director_id", actor.id).maybeSingle(),
+      admin.from("schools").select("id").eq("id", item.schoolId).maybeSingle(),
       admin.from("users").select("id").eq("email", item.email.toLowerCase()).maybeSingle(),
     ])
-    if (!school || !user) continue
+    if (!school || !user || !await canManageSchool(actor, item.schoolId)) continue
     const { error } = await admin.from("user_school_assignments").upsert({ user_id: user.id, school_id: school.id, assigned_role: item.role, created_by: actor.id }, { onConflict: "user_id,school_id,assigned_role" })
     if (!error) imported += 1
   }
