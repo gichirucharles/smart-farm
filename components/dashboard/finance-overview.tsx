@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import Link from "next/link"
 import type { FormEvent, ReactNode } from "react"
+import { AccountantAccessPreview } from "@/components/dashboard/accountant-access-preview"
 import useSWR from "swr"
 import { formatKSH } from "@/lib/currency"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -33,7 +34,7 @@ const fetcher = async (url: string): Promise<FinanceData> => {
   return data
 }
 
-export function FinanceOverview() {
+export function FinanceOverview({ lockedPreview = false }: { lockedPreview?: boolean }) {
   const { data, error, isLoading, mutate } = useSWR<FinanceData>("/api/finance", fetcher)
   const [activeTab, setActiveTab] = useState("overview")
   const [search, setSearch] = useState("")
@@ -63,6 +64,7 @@ export function FinanceOverview() {
   }
 
   if (isLoading) return <div className="flex min-h-48 items-center justify-center text-muted-foreground"><LoaderCircle className="mr-2 size-4 animate-spin" />Loading school finance…</div>
+  if (error && lockedPreview && error.message === "Authentication required") return <AccountantAccessPreview mode="collections" />
   if (error) return <Alert variant="destructive"><AlertCircle className="size-4" /><AlertDescription className="flex flex-wrap items-center justify-between gap-3"><span>{error.message}</span><div className="flex flex-wrap gap-2">{error.message === "Authentication required" && <Button asChild variant="outline" size="sm"><Link href="/login/accountant">Sign in as accountant</Link></Button>}<Button variant="outline" size="sm" onClick={() => void mutate()}><RefreshCw data-icon="inline-start" />Retry</Button></div></AlertDescription></Alert>
   if (!data) return null
 
