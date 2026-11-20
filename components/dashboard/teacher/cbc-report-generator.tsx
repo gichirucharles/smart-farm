@@ -139,7 +139,8 @@ export default function CBCReportGenerator() {
       .replace(/{competency}/g, competency);
 
     // Add competency-specific descriptors
-    const descriptor = competencyGuidance[competency.toLowerCase().split(' ')[0]]?.[`Level ${level}`];
+    const competencyKey = competency.toLowerCase().split(' ')[0] as keyof typeof competencyGuidance;
+    const descriptor = competencyGuidance[competencyKey]?.[`Level ${level}` as keyof typeof competencyGuidance[typeof competencyKey]];
     narrative = narrative.replace(/{specific_descriptor}/g, descriptor || 'specific skills');
 
     // Add contextual phrases

@@ -1,5 +1,7 @@
 "use client"
 
+/* eslint-disable react/jsx-key -- DataTable wraps each generated cell value in its own keyed TableCell. */
+
 import useSWR from "swr"
 import { useState } from "react"
 import { AlertCircle, ArrowDownLeft, ArrowUpRight, Banknote, BriefcaseBusiness, ClipboardList, FileText, LoaderCircle, RefreshCw, Wallet } from "lucide-react"

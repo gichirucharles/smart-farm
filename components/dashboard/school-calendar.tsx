@@ -203,7 +203,6 @@ export function SchoolCalendar() {
                     selected={date}
                     onSelect={setDate}
                     className="rounded-md border"
-                    highlightedDates={getEventDates()}
                   />
                 </div>
                 <div className="md:col-span-2">

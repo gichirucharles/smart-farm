@@ -109,7 +109,7 @@ export async function registerParentForStudent(data: {
       parent: parentUser,
       defaultPassword,
       studentInfo: {
-        name: `${student.classes?.name || "Unknown"}`,
+        name: `${student.classes?.[0]?.name || "Unknown"}`,
       },
       message: `Parent account created. Default password: ${defaultPassword}`,
     }

@@ -49,10 +49,10 @@ export async function GET(request: Request) {
 
     if (error) return response({ error: "Unable to load school operations records" }, 500)
 
-    const module = new URL(request.url).searchParams.get("module")
+    const moduleFilter = new URL(request.url).searchParams.get("module")
     const records = (data ?? []).filter((record) => {
       const storedModule = typeof record.details?._module === "string" ? record.details._module : null
-      if (module === "compliance" || module === "activities") return storedModule === module
+      if (moduleFilter === "compliance" || moduleFilter === "activities") return storedModule === moduleFilter
       return storedModule === null
     })
     const today = new Date()
