@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import Link from "next/link"
 import type { FormEvent, ReactNode } from "react"
 import useSWR from "swr"
 import { formatKSH } from "@/lib/currency"
@@ -62,7 +63,7 @@ export function FinanceOverview() {
   }
 
   if (isLoading) return <div className="flex min-h-48 items-center justify-center text-muted-foreground"><LoaderCircle className="mr-2 size-4 animate-spin" />Loading school finance…</div>
-  if (error) return <Alert variant="destructive"><AlertCircle className="size-4" /><AlertDescription className="flex items-center justify-between gap-4">{error.message}<Button variant="outline" size="sm" onClick={() => void mutate()}><RefreshCw data-icon="inline-start" />Retry</Button></AlertDescription></Alert>
+  if (error) return <Alert variant="destructive"><AlertCircle className="size-4" /><AlertDescription className="flex flex-wrap items-center justify-between gap-3"><span>{error.message}</span><div className="flex flex-wrap gap-2">{error.message === "Authentication required" && <Button asChild variant="outline" size="sm"><Link href="/login/accountant">Sign in as accountant</Link></Button>}<Button variant="outline" size="sm" onClick={() => void mutate()}><RefreshCw data-icon="inline-start" />Retry</Button></div></AlertDescription></Alert>
   if (!data) return null
 
   return <section id="fee-management" className="flex scroll-mt-6 flex-col gap-5" aria-label="Fee management and collections">
