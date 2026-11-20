@@ -42,19 +42,33 @@ export async function GET() {
     schoolIds.length ? admin.from("governance_audit_log").select("id, school_id, actor_id, action, entity_type, summary, created_at").in("school_id", schoolIds).order("created_at", { ascending: false }).limit(100) : Promise.resolve({ data: [], error: null }),
     admin.from("user_school_assignments").select("id, school_id, assigned_role, user_id").in("school_id", schoolIds.length ? schoolIds : ["00000000-0000-0000-0000-000000000000"]),
     Promise.all(schools.map(async (school) => {
-      const [{ count: enrolment }, { data: payments }, { data: classes }] = await Promise.all([
+      const [{ count: enrolment }, { data: payments }, { data: classes }, { data: assessments }] = await Promise.all([
         admin.from("students").select("id", { count: "exact", head: true }).eq("school_id", school.id).eq("is_active", true),
         admin.from("finance_payments").select("amount").eq("school_id", school.id),
         admin.from("classes").select("id").eq("school_id", school.id),
+        admin.from("assessments").select("id, total_marks").eq("school_id", school.id),
       ])
       const classIds = (classes ?? []).map((item) => item.id)
-      const { data: attendance } = classIds.length
-        ? await admin.from("attendance").select("status").in("class_id", classIds).gte("date", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)).limit(10000)
-        : { data: [] }
+      const assessmentIds = (assessments ?? []).map((item) => item.id)
+      const [{ data: attendance }, { data: results }] = await Promise.all([
+        classIds.length
+          ? admin.from("attendance").select("status").in("class_id", classIds).gte("date", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)).limit(10000)
+          : Promise.resolve({ data: [] }),
+        assessmentIds.length
+          ? admin.from("assessment_results").select("assessment_id, marks_obtained").in("assessment_id", assessmentIds).limit(20000)
+          : Promise.resolve({ data: [] }),
+      ])
       const attendanceRate = attendance?.length
         ? Math.round((attendance.filter((item) => ["present", "late"].includes(item.status.toLowerCase())).length / attendance.length) * 100)
         : null
-      return { id: school.id, name: school.name, county: school.county, enrolment: enrolment ?? 0, feesCollected: (payments ?? []).reduce((sum, payment) => sum + Number(payment.amount || 0), 0), attendanceRate }
+      const totalMarksByAssessment = new Map((assessments ?? []).map((item) => [item.id, Number(item.total_marks)]))
+      const validScores = (results ?? []).flatMap((result) => {
+        const totalMarks = totalMarksByAssessment.get(result.assessment_id)
+        const marks = Number(result.marks_obtained)
+        return totalMarks && totalMarks > 0 && Number.isFinite(marks) && marks >= 0 && marks <= totalMarks ? [marks / totalMarks * 100] : []
+      })
+      const meanScore = validScores.length ? Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length) : null
+      return { id: school.id, name: school.name, county: school.county, enrolment: enrolment ?? 0, feesCollected: (payments ?? []).reduce((sum, payment) => sum + Number(payment.amount || 0), 0), attendanceRate, meanScore }
     })),
   ])
   if (userResult.error || prefResult.error || permissionsResult.error || approvalsResult.error || auditResult.error || assignmentsResult.error) return response({ error: "Unable to load governance controls" }, 500)

@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, User, Mail, Phone, Building } from "lucide-react"
-import { rolesConfig } from "@/lib/roles-config"
+import { rolesConfig, type AdminRole } from "@/lib/roles-config"
 
 interface RoleSignupProps {
   role: string
@@ -35,7 +35,7 @@ const mockRegisteredUsers = {
 
 export function RoleSignup({ role }: RoleSignupProps) {
   const router = useRouter()
-  const roleConfig = rolesConfig[role]
+  const roleConfig = role in rolesConfig ? rolesConfig[role as AdminRole] : undefined
 
   const [formData, setFormData] = useState({
     fullName: "",

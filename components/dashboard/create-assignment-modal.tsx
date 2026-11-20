@@ -162,7 +162,7 @@ export function CreateAssignmentModal({ isOpen, onClose, onSubmit, classes, subj
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus />
+                  <Calendar mode="single" selected={dueDate} onSelect={setDueDate} autoFocus />
                 </PopoverContent>
               </Popover>
             </div>

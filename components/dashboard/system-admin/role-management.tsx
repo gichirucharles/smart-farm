@@ -82,7 +82,7 @@ export function RoleManagement() {
     if (result.isDuplicate) {
       setDuplicateWarning(result)
     } else if (!result.success) {
-      setError(result.error)
+      setError(result.error ?? "Unable to complete this role update")
     } else {
       loadData()
       setShowDialog(false)
@@ -111,7 +111,7 @@ export function RoleManagement() {
       setNewTeacherId("")
       setReassignReason("")
     } else {
-      setError(result.error)
+      setError(result.error ?? "Unable to complete this role update")
     }
   }
 

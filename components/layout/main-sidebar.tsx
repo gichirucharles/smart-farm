@@ -30,7 +30,7 @@ import { AppLogo } from "@/components/layout/app-logo"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { getAllRoles } from "@/lib/roles-config"
+import { getAllRoles, rolesConfig } from "@/lib/roles-config"
 
 interface SidebarProps {
   className?: string
@@ -119,16 +119,16 @@ export function MainSidebar({ className }: SidebarProps) {
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-1 pl-6">
                 {roles.map((role) => (
-                  <div key={role.id} className="space-y-1">
-                    <div className="font-medium text-sm py-1">{role.name}</div>
+                  <div key={role} className="space-y-1">
+                    <div className="font-medium text-sm py-1">{rolesConfig[role].name}</div>
                     <div className="space-y-1">
-                      <Link href={`/login/${role.id}`} passHref>
+                      <Link href={`/login/${role}`} passHref>
                         <Button variant="ghost" size="sm" className="w-full justify-start">
                           <LogIn className="mr-2 h-3.5 w-3.5" />
                           Login
                         </Button>
                       </Link>
-                      <Link href={`/signup/${role.id}`} passHref>
+                      <Link href={`/signup/${role}`} passHref>
                         <Button variant="ghost" size="sm" className="w-full justify-start">
                           <UserPlus className="mr-2 h-3.5 w-3.5" />
                           Sign Up

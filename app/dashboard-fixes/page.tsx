@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type ComponentProps } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -374,7 +374,7 @@ export default function DashboardFixesPage() {
           <AssignmentResultsModal
             isOpen={assignmentResultsOpen}
             onClose={() => setAssignmentResultsOpen(false)}
-            assignmentData={mockAssignmentData}
+            assignmentData={mockAssignmentData as ComponentProps<typeof AssignmentResultsModal>["assignmentData"]}
           />
 
           <CreateAssignmentModal
@@ -472,10 +472,10 @@ export default function DashboardFixesPage() {
           <IncidentDetailsModal
             isOpen={incidentDetailsOpen}
             onClose={() => setIncidentDetailsOpen(false)}
-            incident={mockIncident}
+            incident={mockIncident as ComponentProps<typeof IncidentDetailsModal>["incident"]}
           />
 
-          <EventDetailsModal isOpen={eventDetailsOpen} onClose={() => setEventDetailsOpen(false)} event={mockEvent} />
+          <EventDetailsModal isOpen={eventDetailsOpen} onClose={() => setEventDetailsOpen(false)} event={mockEvent as ComponentProps<typeof EventDetailsModal>["event"]} />
         </TabsContent>
       </Tabs>
     </div>

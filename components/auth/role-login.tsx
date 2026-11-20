@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react"
-import { rolesConfig } from "@/lib/roles-config"
+import { rolesConfig, type AdminRole } from "@/lib/roles-config"
 import { authenticateSystemAdmin, authenticateSchoolStaff } from "@/lib/auth-service"
 import { AppLogo } from "@/components/layout/app-logo"
 
@@ -21,7 +21,7 @@ interface RoleLoginProps {
 
 export function RoleLogin({ role }: RoleLoginProps) {
   const router = useRouter()
-  const roleConfig = rolesConfig[role]
+  const roleConfig = role in rolesConfig ? rolesConfig[role as AdminRole] : undefined
 
   const [loginData, setLoginData] = useState({
     email: "",

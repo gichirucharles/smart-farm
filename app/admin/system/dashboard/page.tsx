@@ -79,8 +79,8 @@ export default function SystemAdminDashboardPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-              <SystemLogs compact />
-              <SchoolManagement compact />
+              <SystemLogs />
+              <SchoolManagement />
             </div>
           </TabsContent>
 

@@ -78,7 +78,7 @@ export async function POST(request: Request) {
   }
 
   const { data: fileInfo, error: infoError } = await admin.storage.from(POLICY_DOCUMENT_BUCKET).info(objectPath)
-  if (infoError || !fileInfo || fileInfo.size !== fileSize || fileInfo.mimetype !== contentType) {
+  if (infoError || !fileInfo || fileInfo.size !== fileSize || fileInfo.metadata?.mimetype !== contentType) {
     return response({ error: "The uploaded document could not be verified" }, 400)
   }
 
