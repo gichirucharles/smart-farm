@@ -5,6 +5,7 @@
 import useSWR from "swr"
 import Link from "next/link"
 import { useState } from "react"
+import { AccountantAccessPreview } from "@/components/dashboard/accountant-access-preview"
 import { AlertCircle, ArrowDownLeft, ArrowUpRight, Banknote, BriefcaseBusiness, ClipboardList, FileText, LoaderCircle, RefreshCw, Wallet } from "lucide-react"
 import { formatKSH } from "@/lib/currency"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -46,9 +47,10 @@ const entryTypes: EntryType[] = [
   { value: "payroll", label: "Payroll summary", fields: [{ name: "payPeriod", label: "Pay period" }, { name: "staffCount", label: "Staff count", number: true }, { name: "grossPay", label: "Gross pay (KSh)", number: true }, { name: "deductions", label: "Deductions (KSh)", number: true }, { name: "netPay", label: "Net pay (KSh)", number: true }, { name: "paymentDate", label: "Payment date", date: true, optional: true }, { name: "status", label: "Status", options: [["draft", "Draft"], ["approved", "Approved"], ["paid", "Paid"]] }, { name: "notes", label: "Notes", optional: true }] },
 ]
 
-export function FinanceOperations() {
+export function FinanceOperations({ lockedPreview = false }: { lockedPreview?: boolean }) {
   const { data, error, isLoading, mutate } = useSWR<FinanceOperationsData>("/api/finance/operations", fetchOperations)
   if (isLoading) return <div className="flex min-h-40 items-center justify-center text-muted-foreground"><LoaderCircle className="mr-2 size-4 animate-spin" />Loading school accounts and finance operations…</div>
+  if (error && lockedPreview && error.message === "Authentication required") return <AccountantAccessPreview mode="operations" />
   if (error) return <Alert variant="destructive"><AlertCircle className="size-4" /><AlertDescription className="flex flex-wrap items-center justify-between gap-3"><span>{error.message}</span><div className="flex flex-wrap gap-2">{error.message === "Authentication required" && <Button asChild variant="outline" size="sm"><Link href="/login/accountant">Sign in as accountant</Link></Button>}<Button variant="outline" size="sm" onClick={() => void mutate()}><RefreshCw data-icon="inline-start" />Retry</Button></div></AlertDescription></Alert>
   if (!data) return null
 

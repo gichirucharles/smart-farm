@@ -34,8 +34,8 @@ export default function AccountantDashboardPage() {
           ))}
         </nav>
       </header>
-      <FinanceOverview />
-      <FinanceOperations />
+      <FinanceOverview lockedPreview />
+      <FinanceOperations lockedPreview />
     </main>
   )
 }
