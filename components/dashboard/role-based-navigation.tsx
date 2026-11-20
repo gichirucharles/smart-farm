@@ -315,6 +315,14 @@ export function RoleBasedNavigation() {
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={pathname === "/dashboard/accountant"}>
+                    <Link href="/dashboard/accountant">
+                      <DollarSign className="h-4 w-4" />
+                      <span>Accountant Dashboard</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
