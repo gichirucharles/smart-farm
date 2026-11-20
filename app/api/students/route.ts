@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { getSessionActor, hasSameOrigin } from "@/lib/auth-session"
 import { getSupabaseAdmin } from "@/lib/supabase"
+import { canAccessModule } from "@/lib/governance-access"
 
 const GRADE_LEVELS = ["playgroup", "nursery", "kg1", "kg2", "grade1", "grade2", "grade3", "grade4", "grade5", "grade6", "grade7", "grade8", "grade9"] as const
 const ADMISSION_STATUSES = ["applied", "accepted", "enrolled", "transferred", "graduated", "withdrawn"] as const
@@ -49,6 +50,7 @@ export async function GET() {
   const actor = await getSessionActor()
   if (!actor?.schoolId) return response({ error: "Authentication required" }, 401)
   if (!STAFF_ROLES.has(actor.role)) return response({ error: "Access denied" }, 403)
+  if (actor.role !== "parent" && !await canAccessModule(actor.role, "students", "view")) return response({ error: "Access denied" }, 403)
 
   const admin = getSupabaseAdmin()
   const parentLinks = actor.role === "parent"
@@ -96,6 +98,7 @@ export async function POST(request: Request) {
   if (!hasSameOrigin(request)) return response({ error: "Invalid request origin" }, 403)
   const actor = await getSessionActor()
   if (!actor?.schoolId || !MANAGER_ROLES.has(actor.role)) return response({ error: "Only school leadership can register students" }, 403)
+  if (!await canAccessModule(actor.role, "students", "edit")) return response({ error: "Edit access denied" }, 403)
 
   let body: unknown
   try {

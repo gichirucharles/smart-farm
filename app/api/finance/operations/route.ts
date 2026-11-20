@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { getSessionActor, hasSameOrigin } from "@/lib/auth-session"
 import { getSupabaseAdmin } from "@/lib/supabase"
+import { canAccessModule } from "@/lib/governance-access"
 
 const FINANCE_ROLES = new Set(["head_teacher", "director", "accountant"])
 const TABLES = [
@@ -41,10 +42,12 @@ export async function GET() {
   const actor = await getSessionActor()
   if (!actor?.schoolId) return response({ error: "Authentication required" }, 401)
   if (!FINANCE_ROLES.has(actor.role)) return response({ error: "Access denied" }, 403)
+  if (!await canAccessModule(actor.role, "finance", "view")) return response({ error: "Access denied" }, 403)
   const db = getSupabaseAdmin()
-  const results = await Promise.all(TABLES.map(([, table, columns]) =>
-    db.from(table).select(columns).eq("school_id", actor.schoolId).order("created_at", { ascending: false }).limit(500),
-  ))
+  const results = await Promise.all(TABLES.map(([, table, columns]) => {
+    const query = db.from(String(table)).select(String(columns)).eq("school_id", actor.schoolId).order("created_at", { ascending: false }).limit(500)
+    return query as unknown as Promise<{ data: Record<string, unknown>[] | null; error: unknown }>
+  }))
   const failed = results.find((result) => result.error)
   if (failed) return response({ error: "Unable to load school finance operations" }, 500)
   const records = Object.fromEntries(TABLES.map(([key], index) => [key, results[index].data ?? []])) as Record<string, Record<string, unknown>[]>
@@ -72,6 +75,7 @@ export async function POST(request: Request) {
   const actor = await getSessionActor()
   if (!actor?.schoolId) return response({ error: "Authentication required" }, 401)
   if (!FINANCE_ROLES.has(actor.role)) return response({ error: "Access denied" }, 403)
+  if (!await canAccessModule(actor.role, "finance", "edit")) return response({ error: "Edit access denied" }, 403)
   let body: unknown
   try { body = await request.json() } catch { return response({ error: "Invalid request body" }, 400) }
   const parsed = recordSchemas.safeParse(body)
@@ -132,6 +136,7 @@ export async function PATCH(request: Request) {
   const actor = await getSessionActor()
   if (!actor?.schoolId) return response({ error: "Authentication required" }, 401)
   if (!FINANCE_ROLES.has(actor.role)) return response({ error: "Access denied" }, 403)
+  if (!await canAccessModule(actor.role, "finance", "edit")) return response({ error: "Edit access denied" }, 403)
   const schema = z.object({ action: z.literal("review"), id: z.string().uuid(), status: z.enum(["approved", "rejected"]), note: optionalText(500) }).strict()
   let body: unknown
   try { body = await request.json() } catch { return response({ error: "Invalid request body" }, 400) }

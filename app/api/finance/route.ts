@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { getSessionActor, hasSameOrigin } from "@/lib/auth-session"
 import { getSupabaseAdmin } from "@/lib/supabase"
+import { canAccessModule } from "@/lib/governance-access"
 
 const FINANCE_ROLES = new Set(["head_teacher", "director", "accountant"])
 const scheduleSchema = z.object({
@@ -31,6 +32,7 @@ export async function GET() {
   if (!actor?.schoolId) return response({ error: "Authentication required" }, 401)
   const isParent = actor.role === "parent"
   if (!isParent && !FINANCE_ROLES.has(actor.role)) return response({ error: "Access denied" }, 403)
+  if (!isParent && !await canAccessModule(actor.role, "finance", "view")) return response({ error: "Access denied" }, 403)
 
   const db = getSupabaseAdmin()
   const schoolId = actor.schoolId
@@ -109,6 +111,7 @@ export async function POST(request: Request) {
   const actor = await getSessionActor()
   if (!actor?.schoolId) return response({ error: "Authentication required" }, 401)
   if (!FINANCE_ROLES.has(actor.role)) return response({ error: "Access denied" }, 403)
+  if (!await canAccessModule(actor.role, "finance", "edit")) return response({ error: "Edit access denied" }, 403)
 
   let body: unknown
   try { body = await request.json() } catch { return response({ error: "Invalid request body" }, 400) }
