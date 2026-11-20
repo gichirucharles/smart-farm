@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { getSessionActor, hasSameOrigin } from "@/lib/auth-session"
 import { getSupabaseAdmin } from "@/lib/supabase"
+import { canAccessModule } from "@/lib/governance-access"
 
 const MANAGEMENT_ROLES = new Set(["head_teacher", "director", "deputy_head_teacher"])
 const CATEGORIES = ["assets", "library", "laboratories", "stores", "infrastructure", "maintenance", "safety", "land", "transport", "boarding", "meals", "compliance", "activities"] as const
@@ -36,6 +37,7 @@ export async function GET(request: Request) {
   const access = await authorizedActor()
   if ("error" in access) return access.error
   const actor = access.actor
+  if (!await canAccessModule(actor.role, "operations", "view")) return response({ error: "Access denied" }, 403)
 
   try {
     const { data, error } = await getSupabaseAdmin()
@@ -75,6 +77,7 @@ export async function POST(request: Request) {
   const access = await authorizedActor()
   if ("error" in access) return access.error
   const actor = access.actor
+  if (!await canAccessModule(actor.role, "operations", "edit")) return response({ error: "Edit access denied" }, 403)
 
   let body: unknown
   try { body = await request.json() } catch { return response({ error: "Invalid request body" }, 400) }
@@ -110,6 +113,7 @@ export async function PATCH(request: Request) {
   const access = await authorizedActor()
   if ("error" in access) return access.error
   const actor = access.actor
+  if (!await canAccessModule(actor.role, "operations", "edit")) return response({ error: "Edit access denied" }, 403)
 
   let body: unknown
   try { body = await request.json() } catch { return response({ error: "Invalid request body" }, 400) }

@@ -7,6 +7,7 @@ import { FinancialOverview } from "@/components/dashboard/director/financial-ove
 import { DirectorAcademicPerformance } from "@/components/dashboard/director/academic-performance"
 import { StaffOverview } from "@/components/dashboard/director/staff-overview"
 import { NetworkSettings } from "@/components/dashboard/director/network-settings"
+import { GovernanceWorkspace } from "@/components/dashboard/director/governance-workspace"
 
 export const metadata: Metadata = {
   title: "Director Dashboard | ShuleVerse",
@@ -35,6 +36,7 @@ export default function DirectorDashboardPage() {
             <TabsTrigger value="financial">Financial</TabsTrigger>
             <TabsTrigger value="staff">Staff</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="governance">Governance</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -91,6 +93,10 @@ export default function DirectorDashboardPage() {
 
           <TabsContent value="settings" className="space-y-6">
             <NetworkSettings />
+          </TabsContent>
+
+          <TabsContent value="governance" className="space-y-6">
+            <GovernanceWorkspace />
           </TabsContent>
         </Tabs>
       </main>

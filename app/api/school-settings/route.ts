@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { z } from "zod"
 import { getSessionActor, hasSameOrigin } from "@/lib/auth-session"
 import { getSupabaseAdmin } from "@/lib/supabase"
+import { canAccessModule } from "@/lib/governance-access"
 import {
   DEFAULT_EDITABLE_SCHOOL_SETTINGS,
   DEFAULT_SCHOOL_PROFILE,
@@ -59,6 +60,7 @@ async function loadSchoolSettings(schoolId: string) {
 export async function GET() {
   const actor = await getSessionActor()
   if (!actor?.schoolId) return noStoreJson({ error: "Authentication required" }, 401)
+  if (["head_teacher", "director", "deputy_head_teacher"].includes(actor.role) && !await canAccessModule(actor.role, "school_settings", "view")) return noStoreJson({ error: "Access denied" }, 403)
 
   try {
     const result = await loadSchoolSettings(actor.schoolId)
@@ -93,6 +95,7 @@ export async function PATCH(request: Request) {
   const actor = await getSessionActor()
   if (!actor?.schoolId) return noStoreJson({ error: "Authentication required" }, 401)
   if (actor.role !== "head_teacher") return noStoreJson({ error: "Only the head teacher can edit school settings" }, 403)
+  if (!await canAccessModule(actor.role, "school_settings", "edit")) return noStoreJson({ error: "Edit access denied" }, 403)
 
   let body: unknown
   try {
