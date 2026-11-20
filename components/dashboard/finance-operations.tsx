@@ -55,7 +55,7 @@ export function FinanceOperations() {
   data.transactions.filter((item) => item.transaction_type === "expenditure").forEach((item) => actualByCategory.set(item.category, (actualByCategory.get(item.category) ?? 0) + Number(item.amount)))
   const supplierName = (id: string | null) => data.suppliers.find((item) => item.id === id)?.name ?? "Supplier not linked"
 
-  return <section className="flex flex-col gap-5" aria-labelledby="finance-operations-title">
+  return <section id="finance-operations" className="flex scroll-mt-6 flex-col gap-5" aria-labelledby="finance-operations-title">
     <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 id="finance-operations-title" className="text-xl font-semibold tracking-tight">School finance operations</h2><p className="mt-1 text-sm text-muted-foreground">Accounts, public grants, budget control, procurement, petty cash, and payroll summaries.</p></div><div className="flex gap-2"><NewFinanceEntry refresh={() => void mutate()} accounts={data.accounts} suppliers={data.suppliers} requisitions={data.requisitions} purchaseOrders={data.purchaseOrders} /><Button variant="outline" size="sm" onClick={() => void mutate()}><RefreshCw data-icon="inline-start" />Refresh</Button></div></div>
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <Metric title="Income recorded" value={money(data.summary.income)} note="All recorded income" icon={<ArrowDownLeft />} />

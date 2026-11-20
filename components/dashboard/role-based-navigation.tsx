@@ -112,8 +112,8 @@ const roleNavigationConfig = {
         label: "Finance Management",
         items: [
           { title: "Dashboard", url: "/dashboard/accountant", icon: Home },
-          { title: "Fee Management", url: "/dashboard/accountant", icon: DollarSign },
-          { title: "Financial Reports", url: "/dashboard/director/financial-overview", icon: BarChart3 },
+          { title: "Fees & Collections", url: "/dashboard/accountant#fee-management", icon: DollarSign },
+          { title: "Accounts & Budgets", url: "/dashboard/accountant#finance-operations", icon: BarChart3 },
         ],
       },
     ],
