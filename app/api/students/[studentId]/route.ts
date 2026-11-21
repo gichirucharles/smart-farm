@@ -200,12 +200,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ stu
     const { error } = await admin.from("student_discipline_records").insert({ student_id: studentId, school_id: actor.schoolId, incident_date: value.incidentDate, category: value.category, description: value.description, action_taken: value.actionTaken || null, recorded_by: actor.id })
     if (error) return response({ error: "Unable to save the discipline record" }, 400)
   } else if (value.kind === "health_visit") {
-    if (!HEALTH_ROLES.has(actor.role)) return response({ error: "Access denied" }, 403)
-    const { error } = await admin.from("health_records").insert({ student_id: studentId, visit_date: value.visitDate, symptoms: value.symptoms || null, diagnosis: value.diagnosis || null, treatment: value.treatment || null, medication: value.medication || null, follow_up_required: value.followUpRequired, follow_up_date: value.followUpDate || null, recorded_by: actor.id })
+    if (!HEALTH_EDIT_ROLES.has(actor.role)) return response({ error: "Access denied" }, 403)
+    const { error } = await admin.from("health_records").insert({ school_id: actor.schoolId, student_id: studentId, visit_date: value.visitDate, time_in: new Date().toISOString(), symptoms: value.symptoms || null, diagnosis: value.diagnosis || null, treatment: value.treatment || null, medication: value.medication || null, follow_up_required: value.followUpRequired, follow_up_date: value.followUpDate || null, recorded_by: actor.id })
     if (error) return response({ error: "Unable to save the health visit" }, 400)
   } else {
     if (!COUNSELING_ROLES.has(actor.role)) return response({ error: "Access denied" }, 403)
-    const { error } = await admin.from("counseling_sessions").insert({ student_id: studentId, counselor_id: actor.id, session_date: value.sessionDate, session_type: value.sessionType || null, reason: value.reason || null, notes: value.notes || null, follow_up_required: value.followUpRequired, follow_up_date: value.followUpDate || null })
+    const { error } = await admin.from("counseling_sessions").insert({ school_id: actor.schoolId, student_id: studentId, counselor_id: actor.id, session_date: value.sessionDate, session_type: value.sessionType || null, reason: value.reason || null, notes: value.notes || null, follow_up_required: value.followUpRequired, follow_up_date: value.followUpDate || null })
     if (error) return response({ error: "Unable to save the counselling session" }, 400)
   }
   return response({ success: true }, 201)
