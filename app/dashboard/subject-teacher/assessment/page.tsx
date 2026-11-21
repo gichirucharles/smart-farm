@@ -1,5 +1,7 @@
-import { TeacherAssessmentWorkspace } from '@/components/dashboard/teacher/assessment-workspace'
+import { SubjectTeacherWorkspace } from "@/components/dashboard/subject-teacher/workspace"
+
+export const metadata = { title: "Assessment & Marks | ShuleVerse", description: "Enter assessment marks for your assigned subject classes." }
 
 export default function AssessmentPage() {
-  return <TeacherAssessmentWorkspace role="subject" />
+  return <SubjectTeacherWorkspace view="gradebook" />
 }
