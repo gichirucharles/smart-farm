@@ -219,6 +219,7 @@ const roleNavigationConfig = {
           { title: "Attendance", url: "/dashboard/subject-teacher/attendance", icon: UserCheck },
           { title: "Assessment", url: "/dashboard/subject-teacher/assessment", icon: ClipboardList },
           { title: "Teaching & Learning", url: "/dashboard/subject-teacher/academic-operations", icon: BookOpen },
+          { title: "Planning & Lessons", url: "/dashboard/subject-teacher/planning", icon: ClipboardList },
         ],
       },
       {
