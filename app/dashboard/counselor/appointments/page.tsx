@@ -1,40 +1,22 @@
-'use client'
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { CalendarDays, Info } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function AppointmentsPage() {
-  const appointments = [
-    { time: '09:00 AM', student: 'Alice Kimani', duration: '45 mins' },
-    { time: '10:00 AM', student: 'Brian Omondi', duration: '30 mins' },
-    { time: '11:00 AM', student: 'Catherine Njeri', duration: '45 mins' },
-  ]
-
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Appointments</h1>
         <p className="text-muted-foreground">View and manage counselor appointments</p>
       </div>
-
       <Card>
         <CardHeader>
-          <CardTitle>Today's Schedule</CardTitle>
-          <CardDescription>Upcoming appointments</CardDescription>
+          <CardTitle className="flex items-center gap-2"><CalendarDays className="size-5" aria-hidden="true" />Appointment schedule</CardTitle>
+          <CardDescription>Scheduled start times and duration for counseling sessions</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {appointments.map((apt, idx) => (
-              <div key={idx} className="flex items-center gap-4 p-3 border rounded-lg">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                <div className="flex-1">
-                  <p className="font-medium">{apt.student}</p>
-                  <p className="text-sm text-muted-foreground">{apt.time} - {apt.duration}</p>
-                </div>
-                <Button variant="outline" size="sm">Manage</Button>
-              </div>
-            ))}
+          <div className="flex items-start gap-3 rounded-lg border border-dashed p-4">
+            <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <p className="text-sm text-muted-foreground">The connected counseling records store session dates but not appointment start times or duration, so there is no reliable schedule to show yet.</p>
           </div>
         </CardContent>
       </Card>
