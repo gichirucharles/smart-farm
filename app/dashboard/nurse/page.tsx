@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { UserProfileHeader } from "@/components/layout/user-profile-header"
 import { NurseClinicDashboard } from "@/components/dashboard/nurse/clinic-dashboard"
+import { ClinicOperations } from "@/components/dashboard/nurse/clinic-operations"
 import { getSessionActor } from "@/lib/auth-session"
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default async function NurseDashboardPage() {
           <p className="mt-2 text-muted-foreground">Manage sick-bay visits, student checkups, medication plans, and school health activity.</p>
         </header>
         <NurseClinicDashboard />
+        <ClinicOperations />
       </main>
     </div>
   )
