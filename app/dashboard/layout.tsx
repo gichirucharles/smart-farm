@@ -5,6 +5,7 @@ import type React from "react"
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { usePathname } from "next/navigation"
 import { RoleBasedNavigation } from "@/components/dashboard/role-based-navigation"
+import { ClinicWorkflowInbox } from "@/components/dashboard/nurse/clinic-operations"
 import { Separator } from "@/components/ui/separator"
 import {
   Breadcrumb,
@@ -45,7 +46,7 @@ export default function DashboardLayout({
             </BreadcrumbList>
           </Breadcrumb>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>
+        <div className="flex flex-1 flex-col gap-4 p-4"><ClinicWorkflowInbox />{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )
