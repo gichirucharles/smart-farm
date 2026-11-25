@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     const normalizedIdentifier = identifier.trim()
     const query = admin
       .from("users")
-      .select(`id, email, phone, password_hash, role, first_name, last_name, school_id, is_first_login, schools ( id, name, registration_number, subscription_status )`)
+      .select("id, email, phone, password_hash, role, first_name, last_name, school_id, is_first_login")
       .eq("role", role)
     const { data: user, error } = normalizedIdentifier.includes("@")
       ? await query.ilike("email", normalizedIdentifier.toLowerCase()).maybeSingle()
@@ -77,7 +77,6 @@ export async function POST(request: Request) {
       lastName: user.last_name,
       schoolId: user.school_id,
       isFirstLogin: user.is_first_login,
-      school: user.schools,
     }
     const response = NextResponse.json({
       success: true,
