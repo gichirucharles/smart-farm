@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { SchoolManagement } from "@/components/dashboard/system-admin/school-management"
 
 interface AdminSection {
   id: string
@@ -33,7 +34,7 @@ interface AdminSection {
   summary: string
   group: string
   icon: LucideIcon
-  stage: "Prototype UI" | "Added to scope"
+  stage: "Prototype UI" | "Added to scope" | "Live directory"
   capabilities: string[]
 }
 
@@ -44,7 +45,7 @@ const sections: AdminSection[] = [
     summary: "Onboarding, verification, lifecycle, and school-level limits.",
     group: "Platform",
     icon: Building2,
-    stage: "Prototype UI",
+    stage: "Live directory",
     capabilities: [
       "Onboard directors and school groups as tenants.",
       "Approve or reject registrations after checking NEMIS, licence, and KRA documents.",
@@ -271,7 +272,6 @@ const sections: AdminSection[] = [
 ]
 
 const prototypeSectionIds = new Set([
-  "tenants",
   "accounts",
   "access",
   "configuration",
@@ -284,7 +284,7 @@ const groups = ["Platform", "Operations", "Trust & reliability", "Service & gove
 
 function SectionStatus({ stage }: { stage: AdminSection["stage"] }) {
   return (
-    <Badge variant={stage === "Prototype UI" ? "secondary" : "outline"} className="shrink-0 self-start font-medium">
+    <Badge variant={stage === "Prototype UI" ? "secondary" : stage === "Live directory" ? "default" : "outline"} className="shrink-0 self-start font-medium">
       {stage}
     </Badge>
   )
@@ -406,16 +406,16 @@ function Overview({ onSelect }: { onSelect: (id: string) => void }) {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Prototype screens</CardDescription>
-            <CardTitle className="text-2xl">7 areas</CardTitle>
+            <CardTitle className="text-2xl">6 areas</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">Existing admin UI is marked clearly where it is still prototype-only.</CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Production workflows</CardDescription>
-            <CardTitle className="text-2xl">Not wired</CardTitle>
+            <CardDescription>Live directory</CardDescription>
+            <CardTitle className="text-2xl">Schools connected</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">This update organizes the requested areas; it does not activate database-backed admin actions.</CardContent>
+          <CardContent className="text-sm text-muted-foreground">School records load from Supabase; other administration areas remain scope-only.</CardContent>
         </Card>
       </div>
 
@@ -458,6 +458,8 @@ function Overview({ onSelect }: { onSelect: (id: string) => void }) {
 
 function SectionDetails({ section }: { section: AdminSection }) {
   const Icon = section.icon
+
+  if (section.id === "tenants") return <SchoolManagement />
 
   return (
     <div className="flex flex-col gap-6">
