@@ -35,7 +35,7 @@ export default function SystemAdminLoginPage() {
       if (result.success) {
         router.push("/admin/system/dashboard")
       } else {
-        setError("Invalid credentials. Please check your email and password.")
+        setError(result.error ?? "Invalid credentials. Please check your email and password.")
       }
     } catch (error) {
       setError("An error occurred. Please try again.")

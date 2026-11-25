@@ -49,7 +49,15 @@ export async function POST(request: Request) {
       ? await query.ilike("email", normalizedIdentifier.toLowerCase()).maybeSingle()
       : await query.eq("phone", normalizedIdentifier.replace(/\D/g, "")).maybeSingle()
 
-    if (error || !user) {
+    if (error) {
+      console.error("Login user lookup failed:", { code: error.code, message: error.message })
+      return NextResponse.json(
+        { success: false, error: "Sign-in is temporarily unavailable. Please try again shortly." },
+        { status: 503, headers: { "Cache-Control": "no-store" } },
+      )
+    }
+
+    if (!user) {
       return NextResponse.json({ success: false, error: "Invalid credentials" }, { status: 401 })
     }
 
